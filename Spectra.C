@@ -91,14 +91,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29));
   
-    if(strcmp(mode,"pp2")==0 && !(v==0 || v==1 || v==2 || v==7 || v==10 || v==13 || v==20 || v==21 || v==26 || v==27 || v==28 || v==29 || v==30)) continue;
-    if(strcmp(mode,"pp7")==0 && !(v==0 || v==3 || v==4 || v==8 ||v==11 || v==13 || v==22 || v==23 || v==26 || v==27 || v==28 || v==29 || v==30 || v==31 || v==32 || v==33)) continue;
     if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==2 && (v!=0)) continue;
-    float xtScaling = 1;
-    if(v==29 && strcmp(mode,"pp2")==0) xtScaling = 5.02/2.76;
-    if(v==29 && strcmp(mode,"pp7")==0) xtScaling = 5.02/7.00;
 
     //reco
     h_jet = new TH1D("h_jet","",nJetBins,0,300); 
@@ -234,16 +229,6 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           evtMix->GetEntry(lastMixEvt);  
           if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
           else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
-          else if(strcmp(mode,"pp2")==0 && TMath::Abs((hiHFplusMix+hiHFminusMix)-(hiHFplus+hiHFminus))<1) break;
-          else if(strcmp(mode,"pp7")==0)
-          {  
-            trackMix->GetEntry(lastMixEvt);
-            //only used if needing to evaluate PU systematics 
-            //if(v==31 && nVtx>=7) continue;
-            //if(v==32 && nVtx<5) continue;
-            //if(v==33 && nVtx>=5 && nVtx<7) continue;
-            if((nVtx<13 ? nVtx==nVtxMix : (nVtxMix>=13))) break;
-          }
         }
       }
   
@@ -876,17 +861,13 @@ int main(int argc, const char* argv[])
 
   std::string  parsedMode;
   std::string  parsedTrigger;
-  if(listOfFilesJets[job].find("pp2") != std::string::npos) parsedMode = "pp2";
-  if(listOfFilesJets[job].find("pp7") != std::string::npos) parsedMode = "pp7";
   if(listOfFilesJets[job].find("pPb5") != std::string::npos) parsedMode = "pPb5"; 
   if(listOfFilesJets[job].find("Pbp5") != std::string::npos) parsedMode = "Pbp5";
   if(listOfFilesJets[job].find("pp5") != std::string::npos) parsedMode = "pp5";
 
   if(listOfFilesJets[job].find("jet80_") != std::string::npos) parsedTrigger = "jet80";
   if(listOfFilesJets[job].find("jet40_") != std::string::npos) parsedTrigger = "jet40";
-  if(listOfFilesJets[job].find("jet30_") != std::string::npos) parsedTrigger = "jet30";
   if(listOfFilesJets[job].find("jet60_") != std::string::npos) parsedTrigger = "jet60";
-  if(listOfFilesJets[job].find("jet110_") != std::string::npos) parsedTrigger = "jet110";
 
   int MCStatus = 0;
   if(listOfFilesJets[job].find("/MC/") != std::string::npos) MCStatus = 1;
