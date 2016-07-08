@@ -1,0 +1,8 @@
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_0.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_1.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_10.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_11.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_12.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_13.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_14.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/Pbp5/data/Pbp5MB_0_20150228_15.root

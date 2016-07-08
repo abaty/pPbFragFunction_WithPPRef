@@ -1,0 +1,10 @@
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet40_1_20150301_0.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet40_1_20150301_1.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet40_1_20150301_2.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet40_1_20150301_3.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet40_1_20150301_4.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet80_1_20150301_0.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet80_1_20150301_1.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet80_1_20150301_2.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet80_1_20150301_3.root
+/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pp2/MC/pp2jet80_1_20150301_4.root
