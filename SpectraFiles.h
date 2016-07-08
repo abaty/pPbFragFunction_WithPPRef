@@ -111,31 +111,15 @@ double upJetPtBound;
 
 void setJetPtRange(const char * mode, const char* trigger, int doXt = 0)
 {
-  if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp2")==0 || strcmp(mode,"pp5")==0) && strcmp(trigger,"jet80")==0)
+  if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0  || strcmp(mode,"pp5")==0) && strcmp(trigger,"jet80")==0)
   {
     lowJetPtBound = 100; 
     upJetPtBound  = 200;
   }
-  if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp2")==0 || strcmp(mode,"pp5")==0) && strcmp(trigger,"jet40")==0)
+  if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0) && strcmp(trigger,"jet40")==0)
   {
     lowJetPtBound = 60;
     upJetPtBound  = 100;
-  }
-  if(strcmp(mode,"pp7")==0 && strcmp(trigger,"jet30")==0)
-  {
-    lowJetPtBound = 60;
-    upJetPtBound  = 80;
-  }
-  if(strcmp(mode,"pp7")==0 && strcmp(trigger,"jet60")==0)
-  {
-    lowJetPtBound = 80;
-    upJetPtBound  = 140;
-  }
-  if(strcmp(mode,"pp7")==0 && strcmp(trigger,"jet110")==0)
-  {
-    lowJetPtBound = 140;
-    upJetPtBound  = 200;
-    if(doXt == 1) upJetPtBound = 300;
   }
   return;
 }
