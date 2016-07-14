@@ -76,7 +76,7 @@ float geneta[maxJet];
 float genphi[maxJet];
 
 int run;
-int lumi;
+//int lumi;
 int event;
 float vz;
 float hiHFplus;
@@ -97,9 +97,9 @@ int HLT_PAJet40_NoJetID_v1;
 int HLT_PAJet80_NoJetID_v1_Prescl;
 int HLT_PAJet40_NoJetID_v1_Prescl;
 int HLT_PAZeroBiasPixel_SingleTrack_v1;
-int HLT_AK4CaloJet40_Eta5p1_v1;
-int HLT_AK4CaloJet60_Eta5p1_v1;
-int HLT_AK4CaloJet80_Eta5p1_v1;
+int HLT_AK4PFJet40_Eta5p1_v1;
+int HLT_AK4PFJet60_Eta5p1_v1;
+int HLT_AK4PFJet80_Eta5p1_v1;
 int HLT_ZeroBias;
 int HLT_Jet30;
 int HLT_Jet60;
@@ -140,7 +140,7 @@ void openOutFile(const char * mode, const char * trigger, int isMC, int date,int
   ak3PF->Branch("chargedSum",&chargedSum,"chargedSum[nref]/F");
 
   evt->Branch("run",&run,"run/I");
-  evt->Branch("lumi",&lumi,"lumi/I");
+  //evt->Branch("lumi",&lumi,"lumi/I");
   evt->Branch("vz",&vz,"vz/F");
   evt->Branch("hiHFplus",&hiHFplus,"hiHFplus/F");
   evt->Branch("hiHFminus",&hiHFminus,"hiHFminus/F"); 
@@ -228,7 +228,7 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
   if(strcmp(mode,"pp7")!=0 || (!isMC && strcmp(trigger,"MB")!=0))
   {
     evtIn->SetBranchAddress("run",&run);
-    evtIn->SetBranchAddress("lumi",&lumi);
+    //evtIn->SetBranchAddress("lumi",&lumi);
     evtIn->SetBranchAddress("vz",&vz);
     evtIn->SetBranchAddress("hiHFplus",&hiHFplus);
     evtIn->SetBranchAddress("hiHFminus",&hiHFminus);
@@ -245,7 +245,7 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
   skimIn->SetBranchAddress("pPAcollisionEventSelectionPA",&pPAcollisionEventSelectionPA);
   skimIn->SetBranchAddress("pHBHENoiseFilter",&pHBHENoiseFilter);
 
-  if(!strcmp(mode,"pp7")==0 && !strcmp(mode,"ppref5")==0)
+  if(strcmp(mode,"pp7")!=0 && strcmp(mode,"ppref5")!=0)
   {
     hltIn->SetBranchAddress("HLT_PAJet80_NoJetID_v1",&HLT_PAJet80_NoJetID_v1);
     hltIn->SetBranchAddress("HLT_PAJet40_NoJetID_v1",&HLT_PAJet40_NoJetID_v1);
@@ -253,9 +253,9 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
     hltIn->SetBranchAddress("HLT_PAJet40_NoJetID_v1_Prescl",&HLT_PAJet40_NoJetID_v1_Prescl);
   }
   if(strcmp(mode,"ppref5")==0){
-    hltIn->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&HLT_AK4CaloJet40_Eta5p1_v1);
-    hltIn->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&HLT_AK4CaloJet60_Eta5p1_v1);
-    hltIn->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&HLT_AK4CaloJet80_Eta5p1_v1);
+    hltIn->SetBranchAddress("HLT_AK4PFJet40_Eta5p1_v1",&HLT_AK4PFJet40_Eta5p1_v1);
+    hltIn->SetBranchAddress("HLT_AK4PFJet60_Eta5p1_v1",&HLT_AK4PFJet60_Eta5p1_v1);
+    hltIn->SetBranchAddress("HLT_AK4PFJet80_Eta5p1_v1",&HLT_AK4PFJet80_Eta5p1_v1);
   }
  
   if(strcmp(mode,"pp7")==0)

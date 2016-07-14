@@ -35,7 +35,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
 
   //some parameters for  files
   //max output file size
-  const int maxOutputFileSize = 200000;
+  const int maxOutputFileSize = 700000;
   //if(isMC) 
 
 //setting up files 
@@ -94,6 +94,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
   //looping over forests to skim out of
   //change f= at 2 spots to change starting point, as well as skim outFileNum
   for(int f = 0; f<nFiles; f++)
+  //for(int f = 0; f<4; f++)
   {   
     int isGoodFile = openInFile(fileList[f].data(),trigger,mode,isMC);
      std::cout << 1 << std::endl;
@@ -142,9 +143,10 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
       }
       if(strcmp(mode,"ppref5")==0)
       {
-        if(strcmp(trigger,"jet80") == 0 && HLT_AK4CaloJet80_Eta5p1_v1 == 0) continue;
-        if(strcmp(trigger,"jet60") == 0 && HLT_AK4CaloJet60_Eta5p1_v1 == 0) continue;
-        if(strcmp(trigger,"jet40") == 0 && HLT_AK4CaloJet40_Eta5p1_v1 == 0) continue;
+        if(strcmp(trigger,"jet80") == 0 && HLT_AK4PFJet80_Eta5p1_v1 == 0) continue;
+        if(strcmp(trigger,"jet60") == 0 && HLT_AK4PFJet60_Eta5p1_v1 == 0) continue;
+        if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
+        afterHLTCut++;
       }
 
       //Filling Trees 

@@ -40,7 +40,7 @@ double getXi(double jet_pt, double jet_eta, double jet_phi, double track_pt, dou
 //modes are pp2,pp7,pPb5,Pbp5,pp5
 void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2", const char* trigger = "jet80", bool isMC = 0,int  jobNum = -1, int typeUE = 3, double jetEtaMin = 0, double jetEtaMax = 1.5)
 {
-  if(strcmp(mode,"pp2") && strcmp(mode,"pp7") && strcmp(mode,"pPb5") && strcmp(mode,"Pbp5") && strcmp(mode,"pp5"))
+  if(strcmp(mode,"pp2") && strcmp(mode,"pp7") && strcmp(mode,"pPb5") && strcmp(mode,"Pbp5") && strcmp(mode,"pp5") && strcmp(mode,"ppref5"))
   {
     std::cout << "Invalid mode, modes are pp2, pp7, pPb5, Pbp5" << std::endl;
     return;
@@ -92,7 +92,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29));
   
-    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30)) continue;
+    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==2 && (v!=0)) continue;
 
@@ -153,6 +153,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     int startMixEvt = 0;
     int lastMixEvt = 1;
     //mixing variable for pPb systems
+    //not updated for pp reference
     float mixHFProxy[100000] = {0};
     if(typeUE==2 && (strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"Pbp5") == 0))
     {
@@ -865,6 +866,7 @@ int main(int argc, const char* argv[])
   if(listOfFilesJets[job].find("pPb5") != std::string::npos) parsedMode = "pPb5"; 
   if(listOfFilesJets[job].find("Pbp5") != std::string::npos) parsedMode = "Pbp5";
   if(listOfFilesJets[job].find("pp5") != std::string::npos) parsedMode = "pp5";
+  if(listOfFilesJets[job].find("ppref5") != std::string::npos) parsedMode = "ppref5";
 
   if(listOfFilesJets[job].find("jet80_") != std::string::npos) parsedTrigger = "jet80";
   if(listOfFilesJets[job].find("jet40_") != std::string::npos) parsedTrigger = "jet40";
