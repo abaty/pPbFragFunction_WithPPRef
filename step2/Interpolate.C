@@ -53,7 +53,7 @@ void makeFF(int v, int UEtype=3)
     //Pbpdirection
     Pbp5TeV_data[i]= getFF_pp(FF_Bound[i%FF_Bins],FF_Bound[i%FF_Bins+1],Form("Pbp5TeV_data_%d_%d",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1]),3,i>=FF_Bins);
 
-    ppref5TeV_data[i]= getFF_pp(FF_Bound[i%FF_Bins],FF_Bound[i%FF_Bins+1],Form("ppref5TeV_data_%d_%d",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1]),3,i>=FF_Bins);
+    ppref5TeV_data[i]= getFF_pp(FF_Bound[i%FF_Bins],FF_Bound[i%FF_Bins+1],Form("ppref5TeV_data_%d_%d",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1]),4,i>=FF_Bins);
     
     //Reco MC
     pPb5TeV_recoMC[i]= getFF_pp(FF_Bound[i%FF_Bins],FF_Bound[i%FF_Bins+1],Form("pPb5TeV_recoMC_%d_%d",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1]),6,i>=FF_Bins);
@@ -300,6 +300,15 @@ void getSpectra(int mode)
     trkUE   = Pbp5_0_trackUE;
     trk_xi     = Pbp5_0_track_xi;
     trkUE_xi   = Pbp5_0_trackUE_xi;
+  }
+  if(mode == 4)
+  {
+    jet     = ppref5_0_jet;
+    jet_pPb = ppref5_0_jet;
+    trk     = ppref5_0_track;
+    trkUE   = ppref5_0_trackUE;
+    trk_xi     = ppref5_0_track_xi;
+    trkUE_xi   = ppref5_0_trackUE_xi;
   }
 
   if(mode == 6)
