@@ -121,6 +121,21 @@ void setJetPtRange(const char * mode, const char* trigger, int doXt = 0)
     lowJetPtBound = 60;
     upJetPtBound  = 100;
   }
+  if(strcmp(mode,"ppref5")==0 && strcmp(trigger,"jet40")==0)
+  {
+    lowJetPtBound = 60;
+    upJetPtBound  = 80;
+  }
+  if(strcmp(mode,"ppref5")==0 && strcmp(trigger,"jet60")==0)
+  {
+    lowJetPtBound = 80;
+    upJetPtBound  = 100;
+  }
+  if(strcmp(mode,"ppref5")==0 && strcmp(trigger,"jet80")==0)
+  {
+    lowJetPtBound = 100;
+    upJetPtBound  = 200;
+  }
   return;
 }
 

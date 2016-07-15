@@ -17,6 +17,10 @@
 #include "getJEC_L2L3res.h"
 #include "getJEC_SystError.h"
 
+//TODO
+//ppref5 corrctions
+//ppref JEC correctinos/systematics
+
 const double pPbRapidity = 0.4654094531;
 const int nJetBins = 120;
 const int ntrackBins=23;
@@ -80,12 +84,14 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   //for testing code in interactive mode only
   if(jobNum == -1)
   {
-    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
+    //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
+    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet40_0_20160712_0.root",0);
     if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5MB_0_20150227_0.root",0);
   }
-
-  getInputFile(inputJets,isMC);
-  if(typeUE==2) getInputFileMix(inputMB,isMC);
+  else{
+    getInputFile(inputJets,isMC);
+    if(typeUE==2) getInputFileMix(inputMB,isMC);
+  }
 
   //different nonzero variations are used for systematics checks, variation 0 is for the basic calculation
   for(int v = 0; v<variations; v++)
@@ -197,7 +203,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       {
         //calculating mutliplicity mixing variable for pPb
         float HFProxy = 0;
-        if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"Pbp5") == 0)
+        if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"ppref5") == 0  || strcmp(mode,"Pbp5") == 0)
         {
           track->GetEntry(i);
           for(int t = 0; t<nTrk; t++)
@@ -233,7 +239,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
         }
       }
-  
+ 
       //starting jet loop Reco
       for(int j=0; j<nref; j++)
       {
@@ -246,6 +252,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         totalJetsEtaCutHist->Fill(1,weight);
   
       //JEC and its corrections applied
+        if(!(strcmp(mode,"ppref5")==0)){
         jtpt[j] = getJEC_1st(mode,rawpt[j],jtpt[j],jteta[j]); 
         jtpt[j] = getJEC_2nd(jtpt[j],jteta[j],mode);
         jtpt[j] = getCorrectedJetPt(mode,isMC,jtpt[j],jteta[j]);
@@ -259,7 +266,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
         if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
         if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
-       
+        }
+
         if(jtpt[j]<lowJetPtBound || jtpt[j]>=upJetPtBound) continue;      
         totalJetsPtCutHist->Fill(1,weight);    
         h_jet->Fill(jtpt[j],weight);
@@ -271,11 +279,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(isMC && TMath::Abs(refparton_flavor[j])==21) isG=true;
         if(isQ) h_jet_Q->Fill(jtpt[j],weight);
         if(isG) h_jet_G->Fill(jtpt[j],weight);
-       
+    
         for(int t=0; t<nTrk; t++)
         { 
           if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
-          if(trkPt[t] < 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
+          if(trkPt[t] <= 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
           if(TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1) continue;            
           //calculating r_min for tracking correction
           double r_min = 9;
@@ -372,7 +380,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           for(int t = 0; t < nTrkMix; t++)
           {
             if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
-            if(trkPtMix[t] < 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
+            if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
             if(TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1) continue;
   
             //calculating r_min for tracking correction
@@ -410,13 +418,13 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             }
           }
         }
-  
+ 
         //reco jet gen particle 
         if(isMC)
         {
           for(int t=0; t<nParticle; t++)
           { 
-            if(pPt[t] < 0.5 || pPt[t] > 1e+5 || TMath::Abs(pEta[t])>2.4 ) continue;
+            if(pPt[t] <= 0.5 || pPt[t] > 1e+5 || TMath::Abs(pEta[t])>2.4 ) continue;
             //Filling track spectrum in jet cone
             if(getdR2(jteta[j]+boost,jtphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
             {
@@ -453,7 +461,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             getInputEntryMix(lastMixEvt);
             for(int t = 0; t < nParticleMix; t++)
             {
-              if(pPtMix[t] < 0.5 || pPtMix[t] > 1e+5 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
+              if(pPtMix[t] <= 0.5 || pPtMix[t] > 1e+5 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
             
               //Filling track spectrum in jet cone
               if(getdR2(jteta[j]+boost,jtphi[j],pEtaMix[t]+boost,pPhiMix[t]) < 0.3*0.3)
@@ -498,7 +506,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
        
           for(int t=0; t<nParticle; t++)
           { 
-            if(pPt[t] < 0.5 || pPt[t] > 1e+5 || TMath::Abs(pEta[t])>2.4 ) continue;
+            if(pPt[t] <= 0.5 || pPt[t] > 1e+5 || TMath::Abs(pEta[t])>2.4 ) continue;
   
             //Filling track spectrum in jet cone
             if(getdR2(geneta[j]+boost,genphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
@@ -566,7 +574,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             getInputEntryMix(lastMixEvt);
             for(int t = 0; t < nParticleMix; t++)
             {
-              if(pPtMix[t] < 0.5 || pPtMix[t] > 1e+5 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
+              if(pPtMix[t] <= 0.5 || pPtMix[t] > 1e+5 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
               
               //Filling track spectrum in jet cone
               if(getdR2(geneta[j]+boost,genphi[j],pEtaMix[t]+boost,pPhiMix[t]) < 0.3*0.3)
@@ -592,7 +600,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           for(int t=0; t<nTrk; t++)
           {         
             if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
-            if(trkPt[t] < 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
+            if(trkPt[t] <= 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
             if(TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1) continue;        
             //calculating r_min for tracking correction  
             double r_min = 9;
@@ -655,7 +663,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             for(int t = 0; t < nTrkMix; t++)
             {
               if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
-              if(trkPtMix[t] < 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
+              if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
               if(TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1) continue;
   
               //calculating r_min for tracking correction                                                   

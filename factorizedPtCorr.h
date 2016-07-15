@@ -139,7 +139,7 @@ void InitCorrFiles(sampleType sType = kHIDATA, const char * mode = "pp2")
     FakeCaloFile_p[1] = new TFile("fake_pt1_3_ak3Calo_dogenjet0.root", "READ");
     FakeCaloFile_p[2] = new TFile("fake_pt3_8_ak3Calo_dogenjet0.root", "READ");
     FakeCaloFile_p[3] = new TFile("fake_pt8_300_ak3Calo_dogenjet0.root", "READ");*/
-    if(strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"pp7")==0)
+    if(strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0 || strcmp(mode,"pp7")==0)
     {
       CaloFile_p[0] = new TFile("eff_pt0_1_accept4pt4jtpt4_ak3PF_dogenjet0_doJtPt1_pPb.root", "READ");
       CaloFile_p[1] = new TFile("eff_pt1_3_accept4pt4jtpt4_ak3PF_dogenjet0_doJtPt1_pPb.root", "READ");
