@@ -16,6 +16,7 @@ cp residualJEC.root $now
 cp jetJER.root $now
 cp fileLists/masterList.txt $now
 cp fileLists/masterMBList.txt $now
+tar -cvzf $now/Corrections.tar.gz TrkCorr_*
 
 cp run.sh $now
 
@@ -25,7 +26,7 @@ cp run.sh $now
 cat run.condor | sed "s@log_flag@$now@g" | sed "s@dir_flag@$PWD/$now@g" | sed "s@user_flag@$USER@g" |  sed "s@arglist@@g" | sed "s@transfer_filelist@run.exe@g" | sed "s@njobs@$njobs@g" > $now/run.condor
 
 NAME="Spectra.C"
-g++ $NAME $(root-config --cflags --libs) -Werror -Wall -O2 -o "run.exe"
+g++ $NAME $(root-config --cflags --libs) -Wall -O2 -o "run.exe"
 cp run.exe $now
 rm run.exe
 echo finished compilation

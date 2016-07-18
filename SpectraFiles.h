@@ -69,13 +69,14 @@ float trkDxy1[maxTrack], trkDxy1Mix[maxTrack];
 float trkFake[maxTrack], trkFakeMix[maxTrack];
 int trkCharge[maxTrack], trkChargeMix[maxTrack];
 bool highPurity[maxTrack], highPurityMix[maxTrack];
+float pfEcal[2*maxTrack], pfEcalMix[2*maxTrack];
+float pfHcal[2*maxTrack], pfHcalMix[2*maxTrack];
 //float trkRmin[maxTrack], trkRminMix[maxTrack];
 int nParticle, nParticleMix;
 float pEta[2*maxTrack], pEtaMix[2*maxTrack];
 float pPhi[2*maxTrack], pPhiMix[2*maxTrack];
 float pPt[2*maxTrack], pPtMix[2*maxTrack];
 float mtrkPt[2*maxTrack], mtrkPtMix[2*maxTrack];
-
 
 const int maxJet = 500;
 int nref, nrefMix;
@@ -160,6 +161,8 @@ void getInputFile(const char * name, int isMC)
   track->SetBranchAddress("trkCharge",&trkCharge);
   track->SetBranchAddress("highPurity",&highPurity);
   track->SetBranchAddress("nVtx",&nVtx);
+  track->SetBranchAddress("pfEcal",&pfEcal);
+  track->SetBranchAddress("pfHcal",&pfHcal);
 
   ak3PF->SetBranchAddress("nref",&nref);
   ak3PF->SetBranchAddress("rawpt",&rawpt);
@@ -235,6 +238,8 @@ void getInputFileMix(const char * name, int isMC)
   trackMix->SetBranchAddress("trkCharge",&trkChargeMix);
   trackMix->SetBranchAddress("highPurity",&highPurityMix);
   trackMix->SetBranchAddress("nVtx",&nVtxMix);
+  trackMix->SetBranchAddress("pfEcal",&pfEcalMix);
+  trackMix->SetBranchAddress("pfHcal",&pfHcalMix);
 
   ak3PFMix->SetBranchAddress("nref",&nrefMix);
   ak3PFMix->SetBranchAddress("rawpt",&rawptMix);

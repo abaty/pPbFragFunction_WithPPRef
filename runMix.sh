@@ -5,6 +5,8 @@ then
 fi
 
 sleep $(($1/2))
+echo $HOSTNAME
+tar -xvf Corrections.tar.gz
 
 echo | awk -v i=$(($1)) -v j=$((2)) '{print "./run.exe masterList.txt masterMBList.txt "i" "j}' 
 echo | awk -v i=$(($1)) -v j=$((2)) '{print "./run.exe masterList.txt masterMBList.txt "i" "j}' | bash

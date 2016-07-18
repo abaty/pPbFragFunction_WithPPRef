@@ -97,6 +97,7 @@ int HLT_PAJet40_NoJetID_v1;
 int HLT_PAJet80_NoJetID_v1_Prescl;
 int HLT_PAJet40_NoJetID_v1_Prescl;
 int HLT_PAZeroBiasPixel_SingleTrack_v1;
+int HLT_L1MinimumBiasHF1OR_part5_v1;
 int HLT_AK4PFJet40_Eta5p1_v1;
 int HLT_AK4PFJet60_Eta5p1_v1;
 int HLT_AK4PFJet80_Eta5p1_v1;
@@ -283,6 +284,7 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
   } 
 
   hltIn->SetBranchAddress("HLT_PAZeroBiasPixel_SingleTrack_v1",&HLT_PAZeroBiasPixel_SingleTrack_v1);
+  hltIn->SetBranchAddress("HLT_L1MinimumBiasHF1OR_part5_v1",&HLT_L1MinimumBiasHF1OR_part5_v1);
 
   if(isMC)
   {

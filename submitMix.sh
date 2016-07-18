@@ -17,25 +17,18 @@ cp residualJEC.root $now
 cp jetJER.root $now
 cp fileLists/masterList.txt $now
 cp fileLists/masterMBList.txt $now
+tar -cvzf $now/Corrections.tar.gz TrkCorr_*
+
 
 cp runMix.sh $now/run.sh
 
 #insert blacklist code
-blacklist=""
-for i in $(cat /net/hisrv0001/home/abaty/condor_blacklist/condor_blacklist.txt); do
-  
-  blacklist=$blacklist$i" \&\& "
-done
-blacklist=$blacklist"endoflinetag"
-blacklist=$(echo $blacklist | sed "s@ \\\&\\\& endoflinetag@@g")
-echo "blacklist: "$blacklist 
-cat run.condor | sed "s@blacklist_here@$blacklist@g" > $now/run.condor
 
 
-cat $now/run.condor | sed "s@log_flag@$now@g" | sed "s@dir_flag@$PWD/$now@g" | sed "s@user_flag@$USER@g" |  sed "s@arglist@@g" | sed "s@transfer_filelist@run.exe@g" | sed "s@njobs@$njobs@g" > $now/run.condor
+cat run.condor | sed "s@log_flag@$now@g" | sed "s@dir_flag@$PWD/$now@g" | sed "s@user_flag@$USER@g" |  sed "s@arglist@@g" | sed "s@transfer_filelist@run.exe@g" | sed "s@njobs@$njobs@g" > $now/run.condor
 
 NAME="Spectra.C"
-g++ $NAME $(root-config --cflags --libs) -Werror -Wall -O2 -o "run.exe"
+g++ $NAME $(root-config --cflags --libs) -Wall -O2 -o "run.exe"
 cp run.exe $now
 rm run.exe
 echo finished compilation

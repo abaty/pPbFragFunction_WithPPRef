@@ -61,6 +61,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     if(strcmp("pp7",mode)==0 && strcmp(trigger,"MB")==0) fileList.push_back("/mnt/hadoop/cms/store/user/velicanu/Run2011A/MinimumBias2/FOREST/12Oct2013-v1-merged/pp_7TeV_2011A_12Oct2013-v1.root");
     else if(strcmp("pp7",mode)==0) fileList = readInputFileList("pp7Files.txt");
 
+    if(strcmp("ppref5",mode)==0 && (strcmp(trigger,"MB")==0)) fileList = readInputFileList("pp_MinBias6.txt");
     if(strcmp("ppref5",mode)==0 && (strcmp(trigger,"jet40")==0 || strcmp(trigger,"jet60")==0)) fileList = readInputFileList("HighPtLowerJets.txt");
     if(strcmp("ppref5",mode)==0 && strcmp(trigger,"jet80")==0) fileList = readInputFileList("HIPhysicsJet80.txt");
   }
@@ -146,6 +147,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
         if(strcmp(trigger,"jet80") == 0 && HLT_AK4PFJet80_Eta5p1_v1 == 0) continue;
         if(strcmp(trigger,"jet60") == 0 && HLT_AK4PFJet60_Eta5p1_v1 == 0) continue;
         if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
+        if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
         afterHLTCut++;
       }
 

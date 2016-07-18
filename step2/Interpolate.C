@@ -13,11 +13,13 @@
 #include "TStyle.h"
 #include "loadHistograms.h"
 #include "makePlots.h"
-#include "interpolationErrors.h"
-#include "systematics.C"
-#include "systematicsSummaries.C"
+//#include "interpolationErrors.h"
+//#include "systematics.C"
+//#include "systematicsSummaries.C"
 #include <iostream>
 #include <string>
+
+//TODO MakePlots, systematics, systematicssummairies 
 
 //forward declarations
 TH1D* getFF_pp(double jetPt_low, double jetPt_high, const char* histTitle, int mode = 0, bool isXi = false);
@@ -92,43 +94,43 @@ void makeFF(int v, int UEtype=3)
     std::string isXi = "";
     if(i>=FF_Bins) isXi = "_xi";
     pPb_FF[i] = (TH1D*) pPb5TeV_data[i]->Clone(Form("pPb_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPb_FF[i]->Divide(ppref5TeV_data[i][0]);
+    pPb_FF[i]->Divide(ppref5TeV_data[i]);
     Pbp_FF[i] = (TH1D*) Pbp5TeV_data[i]->Clone(Form("Pbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    Pbp_FF[i]->Divide(ppref5TeV_data[i][0]);
+    Pbp_FF[i]->Divide(ppref5TeV_data[i]);
     pPbPbp_FF[i] = (TH1D*) pPb5Pbp5TeV_fulldata[i]->Clone(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPbPbp_FF[i]->Divide(ppref5TeV_data[i][0]); 
+    pPbPbp_FF[i]->Divide(ppref5TeV_data[i]); 
 
     pPb_FF_recoMC[i] = (TH1D*) pPb5TeV_recoMC[i]->Clone(Form("pPb_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPb_FF_recoMC[i]->Divide(pp5TeV_recoMC[i][0]);
+    pPb_FF_recoMC[i]->Divide(pp5TeV_recoMC[i]);
     pPb_FF_genMC[i] = (TH1D*) pPb5TeV_genMC[i]->Clone(Form("pPb_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPb_FF_genMC[i]->Divide(pp5TeV_genMC[i][0]);
+    pPb_FF_genMC[i]->Divide(pp5TeV_genMC[i]);
     pPb_FF_rJgTMC[i] = (TH1D*) pPb5TeV_rJgTMC[i]->Clone(Form("pPb_FF_rJgTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPb_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i][0]);
+    pPb_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i]);
     pPb_FF_gJrTMC[i] = (TH1D*) pPb5TeV_gJrTMC[i]->Clone(Form("pPb_FF_gJrTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPb_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i][0]);
+    pPb_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i]);
 
     Pbp_FF_recoMC[i] = (TH1D*) Pbp5TeV_recoMC[i]->Clone(Form("Pbp_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    Pbp_FF_recoMC[i]->Divide(pp5TeV_recoMC[i][0]);
+    Pbp_FF_recoMC[i]->Divide(pp5TeV_recoMC[i]);
     Pbp_FF_genMC[i] = (TH1D*) Pbp5TeV_genMC[i]->Clone(Form("Pbp_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    Pbp_FF_genMC[i]->Divide(pp5TeV_genMC[i][0]);
+    Pbp_FF_genMC[i]->Divide(pp5TeV_genMC[i]);
     Pbp_FF_rJgTMC[i] = (TH1D*) Pbp5TeV_rJgTMC[i]->Clone(Form("Pbp_FF_rJgTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    Pbp_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i][0]);
+    Pbp_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i]);
     Pbp_FF_gJrTMC[i] = (TH1D*) Pbp5TeV_gJrTMC[i]->Clone(Form("Pbp_FF_gJrTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    Pbp_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i][0]);
+    Pbp_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i]);
 
     pPbPbp_FF_recoMC[i] = (TH1D*) pPb5Pbp5TeV_recoMC[i]->Clone(Form("pPbPbp_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPbPbp_FF_recoMC[i]->Divide(pp5TeV_recoMC[i][0]);
+    pPbPbp_FF_recoMC[i]->Divide(pp5TeV_recoMC[i]);
     pPbPbp_FF_genMC[i] = (TH1D*) pPb5Pbp5TeV_genMC[i]->Clone(Form("pPbPbp_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPbPbp_FF_genMC[i]->Divide(pp5TeV_genMC[i][0]);
+    pPbPbp_FF_genMC[i]->Divide(pp5TeV_genMC[i]);
     pPbPbp_FF_rJgTMC[i] = (TH1D*) pPb5Pbp5TeV_rJgTMC[i]->Clone(Form("pPbPbp_FF_rJgTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPbPbp_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i][0]);
+    pPbPbp_FF_rJgTMC[i]->Divide(pp5TeV_rJgTMC[i]);
     pPbPbp_FF_gJrTMC[i] = (TH1D*) pPb5Pbp5TeV_gJrTMC[i]->Clone(Form("pPbPbp_FF_gJrTMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pPbPbp_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i][0]);
+    pPbPbp_FF_gJrTMC[i]->Divide(pp5TeV_gJrTMC[i]);
 
     pp5_FF_recoMC[i] = (TH1D*) pp5TeV_recoMC[i]->Clone(Form("pp5_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pp5_FF_recoMC[i]->Divide(pp5TeV_recoMC[i][0]);
+    pp5_FF_recoMC[i]->Divide(pp5TeV_recoMC[i]);
     pp5_FF_genMC[i] = (TH1D*) pp5TeV_genMC[i]->Clone(Form("pp5_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-    pp5_FF_genMC[i]->Divide(pp5TeV_genMC[i][0]);
+    pp5_FF_genMC[i]->Divide(pp5TeV_genMC[i]);
   }
  
   TFile * outfile = new TFile(Form("FragmentationFunctions%sUE%d.root",variationTag[v],UEtype),"recreate");
@@ -163,7 +165,6 @@ void makeFF(int v, int UEtype=3)
     pPb_FF[i]->Write();
     Pbp_FF[i]->Write();  
     pPbPbp_FF[i]->Write(); 
-    pPbPbp_FF_genGluFrac[i]->Write(); 
     pPb_FF_recoMC[i]->Write();
     pPb_FF_genMC[i]->Write();
     pPb_FF_rJgTMC[i]->Write();
@@ -263,7 +264,7 @@ void Interpolate()
 {
   for(int v = 0; v<variations; v++) 
   {
-    if(v<14 || v>19)
+    if((v<1 || v>4) && v!=7 && v!=8 && v!=10 && v!=11 && (v<14 || v>23) && v!=29 && (v<31 || v>33))
     {
       makeFF(v,0);
       if(v!=26) makeFF(v,3);
