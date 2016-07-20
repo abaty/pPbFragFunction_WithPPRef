@@ -4,7 +4,7 @@ then
   exit 1
 fi
 
-sleep $(($1/2))
+sleep $(($1/5))
 echo $HOSTNAME
 tar -xvf Corrections.tar.gz
 

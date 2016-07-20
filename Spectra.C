@@ -17,10 +17,11 @@
 #include "getJEC_L2L3res.h"
 #include "getJEC_SystError.h"
 #include "getTrkCorr.h"
+#include "L2L3ResidualWFits.h"
 
 //TODO
-//ppref5 corrctions
-//ppref JEC correctinos/systematics
+//Potential Problem 1:
+//do I need to correct gen stuff?
 
 const double pPbRapidity = 0.4654094531;
 const int nJetBins = 120;
@@ -62,6 +63,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   InitCorrFiles(sType,mode);
   InitCorrHists(sType);
 
+  L2L3Residual * pprefL2L3 = new L2L3Residual(3, 3, false);
+
   //tracking variables calc
   const int ny=20;
   double trkx[ny+1];
@@ -102,7 +105,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29));
   
-    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30)) continue;
+    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30 || v==34 || v==35 || v==36)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==2 && (v!=0)) continue;
 
@@ -270,6 +273,12 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
         if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
         if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
+        }
+        else{
+          if(!isMC) jtpt[j] = pprefL2L3->get_corrected_pt(jtpt[j], jteta[j]);
+          if(v==34) jtpt[j] = jtpt[j]*1.025;
+          if(v==35) jtpt[j] = jtpt[j]*0.975;
+          if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
         }
 
         if(jtpt[j]<lowJetPtBound || jtpt[j]>=upJetPtBound) continue;      
@@ -497,7 +506,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       if(isMC)
       {  
         for(int j=0; j<ngen; j++)
-        {   
+        {  
+
+          //Potential Problem 1
+ 
           if(v==1 || v==3 || v==5)genpt[j] = genpt[j]*1.03;
           if(v==20 || v==22 || v==24)genpt[j] = genpt[j]*1.02;
           if(v==14 || v==16 || v==18)genpt[j] = genpt[j]*1.01;
