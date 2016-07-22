@@ -184,6 +184,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             if(trkEtaMix[t]<-2 && trkEtaMix[t]>-2.4 && trkPtMix[t]>0.5 && trkPtMix[t]<3 && highPurityMix[t]) mixHFProxy[i]++;
           }
+          else if(strcmp(mode,"ppref5") == 0)
+          {
+            if(((trkEtaMix[t]<-2 && trkEtaMix[t]>-2.4) || (trkEtaMix[t]>2 && trkEtaMix[t]<2.4)) && trkPtMix[t]>0.5 && trkPtMix[t]<3 && highPurityMix[t]) mixHFProxy[i]++;
+          }
         }
       }
     }
@@ -223,6 +227,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               if(trkEta[t]<-2 && trkEta[t]>-2.4 && trkPt[t]>0.5 && trkPt[t]<3 && highPurity[t]) HFProxy++;
             }
+            else if(strcmp(mode,"ppref5") == 0)
+            {
+              if(((trkEta[t]<-2 && trkEta[t]>-2.4) || (trkEta[t]>2 && trkEta[t]<2.4)) && trkPt[t]>0.5 && trkPt[t]<3 && highPurity[t]) HFProxy++;
+            }
           }
         }
         
@@ -242,7 +250,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           lastMixEvt++;
           if(lastMixEvt>startMixEvt+maxIter) lastMixEvt = startMixEvt;
           evtMix->GetEntry(lastMixEvt);  
-          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
+          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
           else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
         }
       }
