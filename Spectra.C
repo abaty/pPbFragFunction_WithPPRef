@@ -56,9 +56,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   TH2::SetDefaultSumw2(); 
   TDatime * dateTime = new TDatime();
   TRandom * rand = new TRandom(dateTime->GetTime());
+  bool ispPbStyleCorr = true;
 
   TrkCorrObj* trkCorrObj;
-  if(strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_May6_Iterative_pp/");
+  if(!ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_eta2p4/");
+  if(ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_pPbFFCuts/");
   const sampleType sType = kPPDATA;
   InitCorrFiles(sType,mode);
   InitCorrHists(sType);
@@ -305,8 +307,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         { 
           if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
           if(trkPt[t] <= 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
-          if(!(strcmp(mode,"ppref5")==0) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
-          if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
+          if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
+          else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
           //calculating r_min for tracking correction
           double r_min = 9;
           double rmin_pt = 60;
@@ -412,8 +414,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
             if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
-            if(!(strcmp(mode,"ppref5")==0) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
-            if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
+            if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
+            else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
   
             //calculating r_min for tracking correction
             double r_min = 9;
@@ -639,8 +641,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {         
             if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
             if(trkPt[t] <= 0.5 || trkPt[t] > 1e+5 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
-            if(!(strcmp(mode,"ppref5")==0) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
-            if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
+            if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
+            else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
             //calculating r_min for tracking correction  
             double r_min = 9;
             double rmin_pt = 60;
@@ -712,8 +714,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
               if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 1e+5 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
-              if(!(strcmp(mode,"ppref5")==0) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
-              if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
+              if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
+              else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
   
               //calculating r_min for tracking correction                                                   
               double r_min = 9;

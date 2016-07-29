@@ -302,10 +302,10 @@ void getSpectra(int mode)
     trk_xi     = Pbp5_0_track_xi;
     trkUE_xi   = Pbp5_0_trackUE_xi;
   }
-  if(mode == 4)
+  if(mode == 4)//reweight shape to pPb data
   {
     jet     = ppref5_0_jet;
-    jet_pPb = ppref5_0_jet;
+    jet_pPb = pPb5Pbp5_0_jet;
     trk     = ppref5_0_track;
     trkUE   = ppref5_0_trackUE;
     trk_xi     = ppref5_0_track_xi;
