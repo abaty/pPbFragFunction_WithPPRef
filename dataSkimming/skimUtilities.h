@@ -5,10 +5,12 @@ double pp2PthatBounds[8] = {50,80,120,170,220,280,10000,10000};
 double pPb5PthatBounds[9]= {50,80,120,170,220,280,370,10000,10000};
 double pp7PthatBounds[8] = {30,50,80,120,170,300,470,600};
 double pp5PthatBounds[10] = {15,30,50,80,120,170,220,280,1000,1000};
+double ppref5PthatBounds[6] = {50,80,120,170,1000,1000};
 double crossSection2[7]  = {1.025E-03,9.865E-05,1.129E-05,1.465E-06,2.837E-07,5.323E-08,0};
 double crossSection5[8]  = {3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07,1.088E-07,0};
 double crossSection7[7]  = {5.31E-2, 6.36E-3, 7.84E-4, 1.15E-4, 2.43E-5, 1.17E-6, 7.02E-8};
 double crossSectionpp5[9] = {5.335E-01,3.378E-02,3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07,0};
+double crossSectionppref5[5] = {4.069E-03,4.959E-04,7.096E-5,1.223E-05,0};
 
 TFile * outf;
 TTree * track;
@@ -54,6 +56,8 @@ float mtrkDz1[2*maxTrack];
 float mtrkDzError1[2*maxTrack];
 float mtrkDxy1[2*maxTrack];
 float mtrkDxyError1[2*maxTrack];
+float mpfEcal[maxTrack];
+float mpfHcal[maxTrack];
 float zVtx[100];
 int maxPtVtx;
 
@@ -167,7 +171,9 @@ void openOutFile(const char * mode, const char * trigger, int isMC, int date,int
     track->Branch("mtrkDzError1",&mtrkDzError1,"mtrkDzError1[nParticle]/F");
     track->Branch("mtrkDxy1",&mtrkDxy1,"mtrkDxy1[nParticle]/F");
     track->Branch("mtrkDxyError1",&mtrkDxyError1,"mtrkDxyError1[nParticle]/F");
-    
+    track->Branch("mpfEcal",&mpfEcal,"mpfEcal[nParticle]/F");
+    track->Branch("mpfHcal",&mpfHcal,"mpfHcal[nParticle]/F");
+
     ak3PF->Branch("refpt",&refpt,"refpt[nref]/F");
     ak3PF->Branch("refeta",&refeta,"refeta[nref]/F");
     ak3PF->Branch("refphi",&refphi,"refphi[nref]/F");
@@ -183,6 +189,7 @@ void openOutFile(const char * mode, const char * trigger, int isMC, int date,int
   }
 
   fileSize = 0;
+  std::cout << "returning" << std::endl;
   return;
 }
 
@@ -302,6 +309,8 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
     trackIn->SetBranchAddress("mtrkDzError1",&mtrkDzError1);
     trackIn->SetBranchAddress("mtrkDxy1",&mtrkDxy1);
     trackIn->SetBranchAddress("mtrkDxyError1",&mtrkDxyError1);
+    trackIn->SetBranchAddress("mtrkPfEcal",&mpfEcal);
+    trackIn->SetBranchAddress("mtrkPfHcal",&mpfHcal);
  
     ak3PFIn->SetBranchAddress("refpt",&refpt);
     ak3PFIn->SetBranchAddress("refeta",&refeta);
@@ -316,6 +325,13 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
       akPu3PFIn->SetBranchAddress("genpt",&genpt);
       akPu3PFIn->SetBranchAddress("geneta",&geneta);
       akPu3PFIn->SetBranchAddress("genphi",&genphi); 
+    }
+    else if(strcmp(mode,"ppref5")==0)
+    {
+      ak3PFIn->SetBranchAddress("ngen",&ngen);
+      ak3PFIn->SetBranchAddress("genpt",&genpt);
+      ak3PFIn->SetBranchAddress("geneta",&geneta);
+      ak3PFIn->SetBranchAddress("genphi",&genphi); 
     }
     else
     {

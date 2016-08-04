@@ -35,7 +35,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
 
   //some parameters for  files
   //max output file size
-  const int maxOutputFileSize = 700000;
+  const int maxOutputFileSize = 300000;
   //if(isMC) 
 
 //setting up files 
@@ -47,6 +47,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     if(strcmp("Pbp5",mode)==0) fileList = readInputFileList("PbpMCFiles.txt");
     if(strcmp("pp7",mode)==0) fileList = readInputFileList("pp7MCFiles.txt");
     if(strcmp("pp5",mode)==0) fileList = readInputFileList("pp5MCFiles.txt");
+    if(strcmp("ppref5",mode)==0) fileList = readInputFileList("pp5_MC.txt");
   }
   else 
   {
@@ -96,9 +97,11 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
   //change f= at 2 spots to change starting point, as well as skim outFileNum
   for(int f = 0; f<nFiles; f++)
   //for(int f = 0; f<4; f++)
-  {   
+  { 
+    std::cout << "opening file" << std::endl;  
     int isGoodFile = openInFile(fileList[f].data(),trigger,mode,isMC);
-     std::cout << 1 << std::endl;
+    std::cout << 1 << std::endl;
+    std::cout << fileList[f].data() << std::endl;
     if(f==0) openOutFile(mode,trigger,isMC,date,outFileNum);
     std::cout << 0 << std::endl;
     if( isGoodFile == 0)
@@ -109,7 +112,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     std::cout << 0 << std::endl;
 
     int nEntries = trackIn->GetEntries();
-    //nEntries = 50;
+    //nEntries = 50000;
     for(int i = 0; i<nEntries; i++)
     {
       totalEvents++;
@@ -142,18 +145,26 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
         if(strcmp(trigger,"jet110") == 0 && HLT_Jet110 == 0 ) continue;
         afterHLTCut++;
       }
+
+      //Filling Trees
+      ak3PFIn->GetEntry(i);
       if(strcmp(mode,"ppref5")==0)
       {
-        if(strcmp(trigger,"jet80") == 0 && HLT_AK4PFJet80_Eta5p1_v1 == 0) continue;
-        if(strcmp(trigger,"jet60") == 0 && HLT_AK4PFJet60_Eta5p1_v1 == 0) continue;
-        if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
-        if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
+        if(!isMC){
+          if(strcmp(trigger,"jet80") == 0 && HLT_AK4PFJet80_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"jet60") == 0 && HLT_AK4PFJet60_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
+        }else{
+          if(strcmp(trigger,"jet80") == 0 && jtpt[0]<90) continue;
+          if(strcmp(trigger,"jet60") == 0 && jtpt[0]<70) continue;
+          if(strcmp(trigger,"jet40") == 0 && jtpt[0]<50) continue;
+          //if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
+        }
         afterHLTCut++;
       }
-
-      //Filling Trees 
+      
       trackIn->GetEntry(i);   
-      ak3PFIn->GetEntry(i);
       if(isMC && (strcmp("pPb5",mode)==0 || strcmp("Pbp5",mode)==0 || strcmp("pp5",mode)==0 || strcmp("pp2",mode)==0)) akPu3PFIn->GetEntry(i);
 
       if(isMC)
@@ -162,6 +173,11 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
         {
           if(pthat > pp2PthatBounds[f+2]) continue;
           weight = crossSection2[f]/(float)nEntries;
+        }
+        if(strcmp("ppref5",mode)==0)
+        {
+          if(pthat > ppref5PthatBounds[f+2]) continue;
+          weight = crossSectionppref5[f]/(float)nEntries;
         }
         if(strcmp("pp5",mode)==0 || strcmp("pPbv25",mode)==0)
         {

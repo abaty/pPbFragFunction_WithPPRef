@@ -3,7 +3,7 @@
 #include "TH1D.h"
 #include <iostream>
 
-const char* filePath = "../mergedHists/processed_2016_07_29__15_45_55/";
+const char* filePath = "../mergedHists/processed_2016_08_04__14_41_27/";
 const int variations = 37;
 const char * variationTag[variations]= {"","_pp2JESUP3","_pp2JESDOWN3","_pp7JESUP3","_pp7JESDOWN3","_pPb5JESUP3","_pPb5JESDOWN3","_pp2JER5","_pp7JER5","_pPb5JER5","_pp2JER2","_pp7JER2","_pPb5JER2","_NoTrackCorr","_pp2JESUP1","_pp2JESDOWN1","_pp7JESUP1","_pp7JESDOWN1","_pPb5JESUP1","_pPb5JESDOWN1","_pp2JESUP2","_pp2JESDOWN2","_pp7JESUP2","_pp7JESDOWN2","_pPb5JESUP2","_pPb5JESDOWN2","_60DegreeCone","_ChargePlus","_ChargeMinus","_XtScaled","_NoChargeCut","_lowPU","_highPU","_midPU","_pprefJESUP2p5","_pprefJESDOWN2p5","_ppref5JER5"};
 
@@ -186,7 +186,8 @@ void loadHistos(int v, int UEtype)
   TFile * spectraFileppref5 = new TFile(Form("%s/ppref5_UE%d_0_15.root",filePath,UEtype),"read");
   TFile * MCFilepPb5 = new TFile(Form("%s/pPb5MC_UE%d_0_15.root",filePath,UEtype),"read");
   TFile * MCFilePbp5 = new TFile(Form("%s/Pbp5MC_UE%d_0_15.root",filePath,UEtype),"read");
-  TFile * MCFilepp5 = new TFile(Form("%s/pp5MC_UE%d_0_15.root",filePath,UEtype),"read");
+  //TFile * MCFilepp5 = new TFile(Form("%s/pp5MC_UE%d_0_15.root",filePath,UEtype),"read");
+  TFile * MCFilepp5 = new TFile(Form("%s/ppref5MC_UE%d_0_15.root",filePath,UEtype),"read");
 
   std::string pp2Tag = "", pp7Tag = "", pPb5Tag = "";
   if(v==1 || v==2 || v==7 || v==10 || v==13 || v==14 || v==15 || v==20 || v==21 || v==26 || v==27 || v==28 || v==29 || v==30) pp2Tag = variationTag[v];
@@ -254,6 +255,7 @@ void loadHistos(int v, int UEtype)
   Pbp5_1_track_xi_gJrT = (TH2D*) MCFilePbp5->Get(Form("Pbp5_gJrT_track_xi%s",pPb5Tag.data()));
   Pbp5_1_trackUE_xi_gJrT = (TH2D*)MCFilePbp5->Get(Form("Pbp5_gJrT_trackUE_xi%s",pPb5Tag.data()));
 
+  /*
   pp5_1_jet_reco = (TH1D*) MCFilepp5->Get(Form("pp5_reco_jet%s",pPb5Tag.data()));
   pp5_1_track_reco = (TH2D*) MCFilepp5->Get(Form("pp5_reco_track%s",pPb5Tag.data()));
   pp5_1_trackUE_reco = (TH2D*) MCFilepp5->Get(Form("pp5_reco_trackUE%s",pPb5Tag.data()));
@@ -269,6 +271,23 @@ void loadHistos(int v, int UEtype)
   pp5_1_trackUE_gJrT = (TH2D*) MCFilepp5->Get(Form("pp5_gJrT_trackUE%s",pPb5Tag.data()));
   pp5_1_track_xi_gJrT = (TH2D*) MCFilepp5->Get(Form("pp5_gJrT_track_xi%s",pPb5Tag.data()));
   pp5_1_trackUE_xi_gJrT = (TH2D*) MCFilepp5->Get(Form("pp5_gJrT_trackUE_xi%s",pPb5Tag.data()));
+  */
+  pp5_1_jet_reco = (TH1D*) MCFilepp5->Get(Form("ppref5_reco_jet%s",pPb5Tag.data()));
+  pp5_1_track_reco = (TH2D*) MCFilepp5->Get(Form("ppref5_reco_track%s",pPb5Tag.data()));
+  pp5_1_trackUE_reco = (TH2D*) MCFilepp5->Get(Form("ppref5_reco_trackUE%s",pPb5Tag.data()));
+  pp5_1_track_xi_reco = (TH2D*) MCFilepp5->Get(Form("ppref5_reco_track_xi%s",pPb5Tag.data()));
+  pp5_1_trackUE_xi_reco = (TH2D*) MCFilepp5->Get(Form("ppref5_reco_trackUE_xi%s",pPb5Tag.data()));
+
+
+  pp5_1_track_rJgT = (TH2D*) MCFilepp5->Get(Form("ppref5_rJgT_track%s",pPb5Tag.data()));
+  pp5_1_trackUE_rJgT = (TH2D*) MCFilepp5->Get(Form("ppref5_rJgT_trackUE%s",pPb5Tag.data()));
+  pp5_1_track_xi_rJgT = (TH2D*) MCFilepp5->Get(Form("ppref5_rJgT_track_xi%s",pPb5Tag.data()));
+  pp5_1_trackUE_xi_rJgT = (TH2D*) MCFilepp5->Get(Form("ppref5_rJgT_trackUE_xi%s",pPb5Tag.data()));
+  pp5_1_track_gJrT = (TH2D*) MCFilepp5->Get(Form("ppref5_gJrT_track%s",pPb5Tag.data()));
+  pp5_1_trackUE_gJrT = (TH2D*) MCFilepp5->Get(Form("ppref5_gJrT_trackUE%s",pPb5Tag.data()));
+  pp5_1_track_xi_gJrT = (TH2D*) MCFilepp5->Get(Form("ppref5_gJrT_track_xi%s",pPb5Tag.data()));
+  pp5_1_trackUE_xi_gJrT = (TH2D*) MCFilepp5->Get(Form("ppref5_gJrT_trackUE_xi%s",pPb5Tag.data()));
+
 
   pPb5_1_jet_gen = (TH1D*) MCFilepPb5->Get(Form("pPb5_gen_jet%s",pPb5Tag.data()));
   pPb5_1_track_gen = (TH2D*) MCFilepPb5->Get(Form("pPb5_gen_track%s",pPb5Tag.data()));
@@ -283,13 +302,18 @@ void loadHistos(int v, int UEtype)
   Pbp5_1_track_xi_gen = (TH2D*) MCFilePbp5->Get(Form("Pbp5_gen_track_xi%s",pPb5Tag.data()));
   Pbp5_1_trackUE_xi_gen = (TH2D*)MCFilePbp5->Get(Form("Pbp5_gen_trackUE_xi%s",pPb5Tag.data()));
  
-
+  /*
   pp5_1_jet_gen = (TH1D*) MCFilepp5->Get(Form("pp5_gen_jet%s",pPb5Tag.data()));
   pp5_1_track_gen = (TH2D*) MCFilepp5->Get(Form("pp5_gen_track%s",pPb5Tag.data()));
   pp5_1_trackUE_gen = (TH2D*) MCFilepp5->Get(Form("pp5_gen_trackUE%s",pPb5Tag.data()));
   pp5_1_track_xi_gen = (TH2D*) MCFilepp5->Get(Form("pp5_gen_track_xi%s",pPb5Tag.data()));
   pp5_1_trackUE_xi_gen = (TH2D*) MCFilepp5->Get(Form("pp5_gen_trackUE_xi%s",pPb5Tag.data()));
-
+  */
+  pp5_1_jet_gen = (TH1D*) MCFilepp5->Get(Form("ppref5_gen_jet%s",pPb5Tag.data()));
+  pp5_1_track_gen = (TH2D*) MCFilepp5->Get(Form("ppref5_gen_track%s",pPb5Tag.data()));
+  pp5_1_trackUE_gen = (TH2D*) MCFilepp5->Get(Form("ppref5_gen_trackUE%s",pPb5Tag.data()));
+  pp5_1_track_xi_gen = (TH2D*) MCFilepp5->Get(Form("ppref5_gen_track_xi%s",pPb5Tag.data()));
+  pp5_1_trackUE_xi_gen = (TH2D*) MCFilepp5->Get(Form("ppref5_gen_trackUE_xi%s",pPb5Tag.data()));
 
   
 //reweighting combined MC to match data in terms of pPb vs Pbp fraction

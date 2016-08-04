@@ -110,7 +110,7 @@ float weight, weightMix;
 double lowJetPtBound;
 double upJetPtBound;
 
-void setJetPtRange(const char * mode, const char* trigger, int doXt = 0)
+void setJetPtRange(const char * mode, const char* trigger, int doXt = 0, int ispprefAndMC = 0)
 {
   if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0  || strcmp(mode,"pp5")==0) && strcmp(trigger,"jet80")==0)
   {
@@ -136,6 +136,10 @@ void setJetPtRange(const char * mode, const char* trigger, int doXt = 0)
   {
     lowJetPtBound = 100;
     upJetPtBound  = 200;
+  }
+  if(ispprefAndMC==1){
+    lowJetPtBound = 60;
+    upJetPtBound = 200;
   }
   return;
 }
