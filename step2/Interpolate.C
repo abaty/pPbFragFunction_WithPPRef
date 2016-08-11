@@ -306,6 +306,7 @@ void getSpectra(int mode)
   {
     jet     = ppref5_0_jet;
     jet_pPb = ppref5_0_jet;
+    //jet_pPb = pPb5Pbp5_0_jet;
     trk     = ppref5_0_track;
     trkUE   = ppref5_0_trackUE;
     trk_xi     = ppref5_0_track_xi;
@@ -336,6 +337,7 @@ void getSpectra(int mode)
   {
     jet     = pp5_1_jet_gen;
     jet_pPb = pp5_1_jet_gen;
+    //jet_pPb = pPb5Pbp5_1_jet_gen;
     trk     = pp5_1_track_gen;
     trkUE   = pp5_1_trackUE_gen;
     trk_xi     = pp5_1_track_xi_gen;
@@ -346,6 +348,7 @@ void getSpectra(int mode)
   {
     jet     = pp5_1_jet_reco;
     jet_pPb = pp5_1_jet_reco;
+    //jet_pPb = pPb5Pbp5_1_jet_reco;
     trk     = pp5_1_track_reco;
     trkUE   = pp5_1_trackUE_reco;
     trk_xi     = pp5_1_track_xi_reco;
@@ -373,6 +376,7 @@ void getSpectra(int mode)
   {
     jet     = pp5_1_jet_reco;
     jet_pPb = pp5_1_jet_reco;
+    //jet_pPb = pPb5Pbp5_1_jet_reco;
     trk     = pp5_1_track_rJgT;
     trkUE   = pp5_1_trackUE_rJgT;
     trk_xi     = pp5_1_track_xi_rJgT;
@@ -391,6 +395,7 @@ void getSpectra(int mode)
   {
     jet     = pp5_1_jet_gen;
     jet_pPb = pp5_1_jet_gen;
+    //jet_pPb = pPb5Pbp5_1_jet_gen;
     trk     = pp5_1_track_gJrT;
     trkUE   = pp5_1_trackUE_gJrT;
     trk_xi     = pp5_1_track_xi_gJrT;

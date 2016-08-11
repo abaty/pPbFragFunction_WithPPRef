@@ -56,6 +56,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   TH2::SetDefaultSumw2(); 
   TDatime * dateTime = new TDatime();
   TRandom * rand = new TRandom(dateTime->GetTime());
+  
   bool ispPbStyleCorr = true;
 
   TrkCorrObj* trkCorrObj;
@@ -202,6 +203,14 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     for(int i=0; i<nEntry; i++)
     {
       getInputEntry(i);
+      //fix to pthat weights if using first production of ppref with Pythia8 (comment otherwise)
+      /*if(isMC && strcmp(mode,"ppref5")==0){
+        if(TMath::Abs(weight-5.334e-07)<1e-9) weight = weight*4.069E-03/5.335E-01;
+        else if(TMath::Abs(weight-1.695e-08)<1e-10)  weight = weight*4.959E-04/3.378E-02;
+        else if(TMath::Abs(weight-3.795e-09)<1e-11)  weight = weight*7.096E-5/3.778E-03;
+        else if(TMath::Abs(weight-4.936e-10)<1e-12)  weight = weight*1.223E-05/4.412E-04;
+      }*/
+
       if(v==31 && nVtx>=7) continue;
       if(v==32 && nVtx<5) continue;
       if(v==33 && nVtx>=5 && nVtx<7) continue;

@@ -47,7 +47,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     if(strcmp("Pbp5",mode)==0) fileList = readInputFileList("PbpMCFiles.txt");
     if(strcmp("pp7",mode)==0) fileList = readInputFileList("pp7MCFiles.txt");
     if(strcmp("pp5",mode)==0) fileList = readInputFileList("pp5MCFiles.txt");
-    if(strcmp("ppref5",mode)==0) fileList = readInputFileList("pp5_MC.txt");
+    if(strcmp("ppref5",mode)==0) fileList = readInputFileList("ppref5_Pythia6.txt");
   }
   else 
   {
@@ -156,10 +156,10 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
           if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
           if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
         }else{
-          if(strcmp(trigger,"jet80") == 0 && jtpt[0]<90) continue;
-          if(strcmp(trigger,"jet60") == 0 && jtpt[0]<70) continue;
-          if(strcmp(trigger,"jet40") == 0 && jtpt[0]<50) continue;
-          //if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
+          if(strcmp(trigger,"jet80") == 0 && HLT_AK4PFJet80_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"jet60") == 0 && HLT_AK4PFJet60_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"jet40") == 0 && HLT_AK4PFJet40_Eta5p1_v1 == 0) continue;
+          if(strcmp(trigger,"MB") == 0 && HLT_L1MinimumBiasHF1OR_part5_v1 == 0) continue;
         }
         afterHLTCut++;
       }
