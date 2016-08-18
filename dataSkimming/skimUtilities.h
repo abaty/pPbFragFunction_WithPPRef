@@ -1,4 +1,5 @@
 #include <fstream>
+#include <vector>
 // MC info
 const int npPb5MC = 7;
 double pp2PthatBounds[8] = {50,80,120,170,220,280,10000,10000};
@@ -25,6 +26,7 @@ TTree * akPu3PFIn;
 TTree * skimIn;
 TTree * evtIn;
 TTree * hltIn;
+TTree * genIn;
 
 //variables to be written
 const int maxTrack = 25000;
@@ -61,6 +63,12 @@ float mpfEcal[maxTrack];
 float mpfHcal[maxTrack];
 float zVtx[100];
 int maxPtVtx;
+
+int mult;
+std::vector<float> *chg;
+std::vector<float> *pt;
+std::vector<float> *eta;
+std::vector<float> *phi;
 
 const int maxJet = 500;
 int nref;
@@ -208,6 +216,15 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
   hltIn = (TTree*)inf->Get("hltanalysis/HltTree"); 
   akPu3PFIn = (TTree*)inf->Get("akPu3PFJetAnalyzer/t");
 
+  if(isMC && (strcmp(mode,"ppref5")==0)){
+    genIn = (TTree*)inf->Get("HiGenParticleAna/hi");
+    genIn->SetBranchAddress("mult",&mult);
+    genIn->SetBranchAddress("pt",&pt);
+    genIn->SetBranchAddress("eta",&eta); 
+    genIn->SetBranchAddress("phi",&phi);
+    genIn->SetBranchAddress("chg",&chg);
+  }
+
  
   //Setting addresses
   trackIn->SetBranchAddress("nTrk",&nTrk); 
@@ -265,6 +282,11 @@ int openInFile(const char * name, const char * trigger, const char * mode, int i
     hltIn->SetBranchAddress("HLT_AK4PFJet40_Eta5p1_v1",&HLT_AK4PFJet40_Eta5p1_v1);
     hltIn->SetBranchAddress("HLT_AK4PFJet60_Eta5p1_v1",&HLT_AK4PFJet60_Eta5p1_v1);
     hltIn->SetBranchAddress("HLT_AK4PFJet80_Eta5p1_v1",&HLT_AK4PFJet80_Eta5p1_v1);
+    if(isMC){
+      hltIn->SetBranchAddress("HLT_AK4PFJet40_Eta5p1ForPPRef_v1",&HLT_AK4PFJet40_Eta5p1_v1);
+      hltIn->SetBranchAddress("HLT_AK4PFJet60_Eta5p1ForPPRef_v1",&HLT_AK4PFJet60_Eta5p1_v1);
+      hltIn->SetBranchAddress("HLT_AK4PFJet80_Eta5p1ForPPRef_v1",&HLT_AK4PFJet80_Eta5p1_v1);
+    }
   }
  
   if(strcmp(mode,"pp7")==0)

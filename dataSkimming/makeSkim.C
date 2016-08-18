@@ -112,7 +112,7 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     std::cout << 0 << std::endl;
 
     int nEntries = trackIn->GetEntries();
-    //nEntries = 50000;
+    //nEntries = 500;
     for(int i = 0; i<nEntries; i++)
     {
       totalEvents++;
@@ -198,6 +198,22 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
         }
       }
       if((strcmp("pp7",mode)==0 && strcmp("MB",trigger)==0 && !isMC) || strcmp("ppref5",mode)==0) vz=zVtx[maxPtVtx];
+
+      if(isMC && strcmp("ppref5",mode)==0){
+        nParticle=0;
+        genIn->GetEntry(i);
+        for(int t = 0; t<mult; t++){
+          if(TMath::Abs(eta->at(t))>2.4) continue;
+          if(chg->at(t)==0) continue;
+          if(pt->at(t)<0.5) continue;
+          pPt[nParticle] = (float)pt->at(t);
+          pEta[nParticle] = (float)eta->at(t);
+          pPhi[nParticle] = (float)phi->at(t);
+          //chg[t] = (float)chg.at(nParticle); 
+          nParticle++;
+        }
+      }
+
       track->Fill();
       ak3PF->Fill();
       evt->Fill();
