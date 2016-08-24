@@ -61,7 +61,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
 
   TrkCorrObj* trkCorrObj;
   if(!ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_eta2p4/");
-  if(ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_pPbFFCuts/");
+  //if(ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_pPbFFCuts/");
+  if(ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_Aug19_Iterative_pp_pPbFFCuts/");
   const sampleType sType = kPPDATA;
   InitCorrFiles(sType,mode);
   InitCorrHists(sType);
@@ -95,7 +96,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   if(jobNum == -1)
   {
     //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
-    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet40_0_20160712_0.root",0);
+    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet40_0_20160712_3.root",0);
     if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5MB_0_20150227_0.root",0);
   }
   else{
@@ -210,6 +211,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         else if(TMath::Abs(weight-3.795e-09)<1e-11)  weight = weight*7.096E-5/3.778E-03;
         else if(TMath::Abs(weight-4.936e-10)<1e-12)  weight = weight*1.223E-05/4.412E-04;
       }*/
+    //FIXME
+      if(weight<1e-10) continue;
 
       if(v==31 && nVtx>=7) continue;
       if(v==32 && nVtx<5) continue;
@@ -335,8 +338,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             double trkCorr = 1;
             if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
-      
+            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,jtpt[j]);     
+
             if(v==13) trkCorr=1; 
             if(std::isfinite(trkCorr))
             {
@@ -369,7 +372,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             double trkCorr = 1;
             if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
+            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,jtpt[j]);     
             
             if(v==13) trkCorr=1;
             if(std::isfinite(trkCorr))
@@ -394,7 +397,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             double trkCorr = 1;
             if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
+            else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,jtpt[j]);     
             
             if(v==13) trkCorr=1;
             if(std::isfinite(trkCorr))
@@ -443,7 +446,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPtMix[t], sType), 1, trkPtMix[t], trkPhiMix[t], trkEtaMix[t], r_min, sType);     
-              else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min);     
+              else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min,jtpt[j]);     
  
               if(v==13) trkCorr=1;
               if(std::isfinite(trkCorr))
@@ -669,7 +672,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
+              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,genpt[j]);     
             
               if(v==13) trkCorr=1;          
               if(std::isfinite(trkCorr))
@@ -689,7 +692,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
+              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,genpt[j]);     
               
               if(v==13) trkCorr=1;
               if(std::isfinite(trkCorr))
@@ -704,7 +707,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
-              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min);     
+              else trkCorr = trkCorrObj->getTrkCorr(trkPt[t],trkEta[t],trkPhi[t],1,r_min,genpt[j]);     
               
               if(v==13) trkCorr=1;
               if(std::isfinite(trkCorr))
@@ -743,7 +746,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               {
                 double trkCorr = 1;
                 if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPtMix[t], sType), 1, trkPtMix[t], trkPhiMix[t], trkEtaMix[t], r_min, sType);     
-                else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min);     
+                else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min,genpt[j]);     
                 
                 if(v==13) trkCorr=1;
                 if(std::isfinite(trkCorr))
