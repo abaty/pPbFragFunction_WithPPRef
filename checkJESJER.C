@@ -7,12 +7,15 @@
 #include "TF1.h"
 #include "TLegend.h"
 
-#include "residualJEC.h"
-#include "jetSmearing.h"
-#include "getJEC_2nd.h"
-#include "getJEC_1st.h"
-#include "getJEC_L2L3res.h"
-#include "getJEC_SystError.h"
+//#include "residualJEC.h"
+//#include "jetSmearing.h"
+//#include "getJEC_2nd.h"
+//#include "getJEC_1st.h"
+//#include "getJEC_L2L3res.h"
+//#include "getJEC_SystError.h"
+
+#include "L2L3ResidualWFits.h"
+#include "MCTruthResidual.h"
 
 #include <iostream>
 
@@ -114,7 +117,7 @@ void FitGauss(TH1D* hist_p, Bool_t isPbPb, float& mean, float& meanErr, float& r
 void checkJESJER(bool doMoreBins = false){
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
-
+  
 
   TH1D * res[9][3];
   TH1D * res_hard[9][3];
@@ -132,13 +135,29 @@ void checkJESJER(bool doMoreBins = false){
   for(int file2= 0; file2<6; file2++){
   std::cout << file2 << std::endl;
 //for pp
+  int radius = 3;
+  double etacutcorr = 3;
+  TString mode;
+  if(file==0) mode = "pp5";
+  if(file==1) mode = "pPb5";
+  if(file==2) mode = "Pbp5";
+  std::cout << mode << std::endl;
+  L2ResidualJES * L2JES = new L2ResidualJES(radius,((int)etacutcorr),mode);
+  L2ResidualJER * L2JER = new L2ResidualJER(mode);
+  L3ResidualJES * L3JES = new L3ResidualJES(mode);
+  MCTruthResidual * MCTruth = new MCTruthResidual(mode);
+ 
   TFile * f;
   if(file==0) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/abaty/mergedForests/Pythia6_Dijet%d_pp5TeV/0.root",pthats[file2]),"read");
 //for pPb
   if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/pPb/HP04/prod16/Hijing_Pythia_pt%d/HiForest_v77_merged01/pt%d_HP04_prod16_v77_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
   if(file==2 && file2<4) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/Pbp/HP05/prod24/Hijing_Pythia_pt%d/HiForest_v84_merged02/pt%d_HP05_prod24_v84_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
+  //if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_pPbDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
+  //if(file==2) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_PbpDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
   if(file==2 && file2>=4) continue;
   TTree * t = (TTree*)f->Get("ak3PFJetAnalyzer/t");
+  TTree * hi;
+  if(file!=0) hi = (TTree*)f->Get("hiEvtAnalyzer/HiTree");
 
   int nref;
   int ngen;
@@ -156,6 +175,8 @@ void checkJESJER(bool doMoreBins = false){
   float genphi[1000];
   float pthat;
 
+  float hiHF4;
+
   t->SetBranchAddress("nref",&nref);
   t->SetBranchAddress("ngen",&ngen);
   t->SetBranchAddress("pthat",&pthat);
@@ -171,6 +192,10 @@ void checkJESJER(bool doMoreBins = false){
   t->SetBranchAddress("genpt",&genpt);
   t->SetBranchAddress("geneta",&geneta);
   t->SetBranchAddress("genphi",&genphi);
+
+  if(file==1) hi->SetBranchAddress("hiHFminusEta4",&hiHF4);
+  if(file==2) hi->SetBranchAddress("hiHFplusEta4",&hiHF4);
+  if(file==1 || file==2) t->AddFriend(hi);
  
   for(int i = 0; i< (doMoreBins?9:5) ; i++){
     std::cout << i << std::endl;
@@ -191,6 +216,36 @@ void checkJESJER(bool doMoreBins = false){
       if(rawpt[j]<30) continue;
       if(chargedSum[j]/rawpt[j]<0.05 || chargedSum[j]/rawpt[j]>0.95) continue;
 
+  double rawptT = rawpt[j];
+  double jtptT = jtpt[j];
+  double jtetaT = jteta[j];
+  double correctedPt = jtptT;
+  bool doMC = true;
+  /*rawptT=100;
+  jtptT=100;
+  jtetaT=1;
+  correctedPt = jtptT;*/
+
+  //if(i%50000==0 && j==0) cout << "rawpt = " << rawpt[j] << " MCpt = " << refpt[j] << endl;
+  if(mode == "pPb5" || mode == "Pbp5"){
+    correctedPt = MCTruth->getJEC_1st(rawptT,correctedPt,jtetaT); 
+  }
+  correctedPt = MCTruth->getResidualCorr(correctedPt,jtetaT);
+  if(i%50000==0 && j==0) cout << "after MC correction jtpt = " << correctedPt << endl;
+  if(!doMC){
+   correctedPt = L2JES->getCorrectedPt(correctedPt, jtetaT);
+   correctedPt = L3JES->getCorrectedPt(correctedPt);
+  if(i%50000==0 && j==0) cout << "after data driven correction jtpt = " << correctedPt << endl;
+  }else{   
+   //double correctedPtOld = correctedPt;
+   correctedPt = L2JER->getSmearedPt(correctedPt, jtetaT);
+   //cout << "smearing factor:" << correctedPt/correctedPtOld << endl;
+  //cout << "after additional smearing for MC jtpt = " << correctedPt << endl;
+  }
+
+  jtpt[j] = correctedPt;
+  //std::cout << correctedPt << std::endl;
+      /*
       if(file==0){
         jtpt[j] = 1.008*jtpt[j];
       }
@@ -203,7 +258,7 @@ void checkJESJER(bool doMoreBins = false){
         jtpt[j] = getJEC_1st("Pbp5",rawpt[j],jtpt[j],jteta[j]); 
         jtpt[j] = getJEC_2nd(jtpt[j],jteta[j],"Pbp5");
         jtpt[j] = getCorrectedJetPt("Pbp5",true,jtpt[j],jteta[j]);
-      }
+      }*/
 
       int bin = -1;
       /*if(jtpt[j]>=60) bin=0;
@@ -221,12 +276,17 @@ void checkJESJER(bool doMoreBins = false){
       if(refpt[j]>=260) bin=6;
       if(refpt[j]>=320) bin=7;
       if(refpt[j]>=380) bin=8;
-      if(refpt[j]<60 || refpt[j]>440 || (!doMoreBins && refpt[j]>200)) bin=-1;
+      if(refpt[j]<60 || refpt[j]>440 || (!doMoreBins && refpt[j]>=200)) bin=-1;
       if(bin == -1) continue;
-      res[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries());
+      //std::cout << "test" << std::endl;
+      //std::cout << jtpt[j]/refpt[j] << " " << crossSection5[file2]/t->GetEntries() << std::endl;
+      //std::cout << bin << " " << file << std::endl;
+      res[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4));
+      //std::cout << "test" << std::endl;
 
       if(chargedMax[j]/rawpt[j]<0.5) continue;
-      else res_hard[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()); 
+      else res_hard[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
+      //std::cout << "test" << std::endl;
     }
   }
   res[0][file]->Print("All");
@@ -258,7 +318,7 @@ void checkJESJER(bool doMoreBins = false){
     resoPP_hard[file]->SetBinContent(j+1,reso);
     resoPP_hard[file]->SetBinError(j+1,resoErr);
   }
-  meanPP[file]->GetYaxis()->SetRangeUser(0.95,1.15);
+  meanPP[file]->GetYaxis()->SetRangeUser(0.95,1.05);
   resoPP[file]->GetYaxis()->SetRangeUser(-0.01,0.2);
   meanPP_hard[file]->GetYaxis()->SetRangeUser(0.95,1.15);
   resoPP_hard[file]->GetYaxis()->SetRangeUser(-0.01,0.2);
@@ -313,4 +373,9 @@ void checkJESJER(bool doMoreBins = false){
   resoPP_hard[2]->Draw("same p");
   leg1->Draw("same");
   c1->SaveAs("checkJESJERPlots/reso_hard_0p5_moreBins.png"); 
+
+  /*delete *L2JES; 
+  delete *L2JER; 
+  delete *L3JES; 
+  delete *MCTruth;*/
 }
