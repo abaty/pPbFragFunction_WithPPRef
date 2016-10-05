@@ -6,13 +6,13 @@ double pp2PthatBounds[8] = {50,80,120,170,220,280,10000,10000};
 double pPb5PthatBounds[9]= {50,80,120,170,220,280,370,10000,10000};
 double pp7PthatBounds[8] = {30,50,80,120,170,300,470,600};
 double pp5PthatBounds[10] = {15,30,50,80,120,170,220,280,1000,1000};
-double ppref5PthatBounds[6] = {50,80,120,170,1000,1000};
+double ppref5PthatBounds[9] = {50,80,120,170,220,280,370,1000,1000};
 double crossSection2[7]  = {1.025E-03,9.865E-05,1.129E-05,1.465E-06,2.837E-07,5.323E-08,0};
 double crossSection5[8]  = {3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07,1.088E-07,0};
 double crossSection7[7]  = {5.31E-2, 6.36E-3, 7.84E-4, 1.15E-4, 2.43E-5, 1.17E-6, 7.02E-8};
 double crossSectionpp5[9] = {5.335E-01,3.378E-02,3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07,0};
 //double crossSectionppref5[5] = {4.069E-03,4.959E-04,7.096E-5,1.223E-05,0};//for Pythia8
-double crossSectionppref5[5] = {3.778E-03,4.412E-04,6.147E-05,1.018E-05,0};//for Pythia6
+double crossSectionppref5[8] = {3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06, 6.160E-07, 1.088E-07,0};//for Pythia6
 
 TFile * outf;
 TTree * track;
