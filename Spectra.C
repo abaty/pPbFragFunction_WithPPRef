@@ -10,11 +10,12 @@
 #include <cmath>
 #include "factorizedPtCorr.h"
 #include "SpectraFiles.h"
-#include "residualJEC.h"
 #include "jetSmearing.h"
+/*#include "residualJEC.h"
 #include "getJEC_2nd.h"
 #include "getJEC_1st.h"
-#include "getJEC_L2L3res.h"
+#include "getJEC_L2L3res.h"*/
+#include "MCTruthResidual.h"
 #include "L2L3ResidualWFits.h"
 #include "getJEC_SystError.h"
 #include "getTrkCorr.h"
@@ -57,8 +58,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   TDatime * dateTime = new TDatime();
   TRandom * rand = new TRandom(dateTime->GetTime());
   
+  //Tracking initialization
   bool ispPbStyleCorr = true;
-
   TrkCorrObj* trkCorrObj;
   if(!ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_eta2p4/");
   //if(ispPbStyleCorr && strcmp(mode,"ppref5")==0) trkCorrObj = new TrkCorrObj("TrkCorr_July22_Iterative_pp_pPbFFCuts/");
@@ -67,7 +68,15 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   InitCorrFiles(sType,mode);
   InitCorrHists(sType);
 
-  L2L3Residual * pprefL2L3 = new L2L3Residual(3, 3, false);
+  //JEC initialization
+  TString Jtmode;
+  if(strcmp(mode,"ppref5")==0) Jtmode = "pp5";
+  if((strcmp(mode,"pPb5")==0) || (strcmp(mode,"pp5")==0)) Jtmode = "pPb5";
+  if(strcmp(mode,"Pbp5")==0) Jtmode = "Pbp5";
+  L2ResidualJES * L2JES = new L2ResidualJES(3,3,Jtmode);
+  L2ResidualJER * L2JER = new L2ResidualJER(Jtmode);
+  L3ResidualJES * L3JES = new L3ResidualJES(Jtmode);
+  MCTruthResidual * MCTruth = new MCTruthResidual(Jtmode);
 
   //tracking variables calc
   const int ny=20;
@@ -281,35 +290,34 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   
       //JEC and its corrections applied
         if(!(strcmp(mode,"ppref5")==0)){
-        jtpt[j] = getJEC_1st(mode,rawpt[j],jtpt[j],jteta[j]); 
-        jtpt[j] = getJEC_2nd(jtpt[j],jteta[j],mode);
-        jtpt[j] = getCorrectedJetPt(mode,isMC,jtpt[j],jteta[j]);
-        //double resCorrTemp = getJEC_L2L3res(jtpt[j])/jtpt[j]-1;
-        if(!isMC)  jtpt[j] = getJEC_L2L3res(jtpt[j]);
-        if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-        if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
-        //if(v==14 || v==16 || v==18)jtpt[j] = jtpt[j]*1.01;
-        if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-        if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
-        //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
-        if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
-        if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
+          jtpt[j] = MCTruth->getJEC_1st(rawpt[j],jtpt[j],jteta[j]); 
+          jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
+          if(!isMC){
+            jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
+            jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);
+          }else{
+            jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
+          } 
+          if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
+          if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          //if(v==14 || v==16 || v==18)jtpt[j] = jtpt[j]*1.01;
+          if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
+          if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
+          if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
+          if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
         }
         else{
+          jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
           //constant shift of 1%
           jtpt[j] = jtpt[j]*1.008;
+          if(!isMC){
+            jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
+            jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);
+          }else{
+            jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
+          } 
 
-          //FIXME
-          /*for(int t =0; t<nTrk; t++){
-            if(trkPt[t]<30) continue;
-            if(trkPt[t] <= 0.5 || trkPt[t] > 200 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
-            if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue; 
-            else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue; 
-            if(TMath::Power(getdR2(jteta[j],jtphi[j],trkEta[t],trkPhi[t]),0.5)<0.3 && trkPt[t]>0.5*jtpt[j]) jtpt[j]=jtpt[j]*0.98;
-          }*/
-          //endFIXME
-
-          if(!isMC) jtpt[j] = pprefL2L3->get_corrected_pt(jtpt[j], jteta[j]);
           if(v==34) jtpt[j] = jtpt[j]*1.025;
           if(v==35) jtpt[j] = jtpt[j]*0.975;
           if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 

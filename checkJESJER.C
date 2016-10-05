@@ -242,7 +242,7 @@ void checkJESJER(bool doMoreBins = false){
    //cout << "smearing factor:" << correctedPt/correctedPtOld << endl;
   //cout << "after additional smearing for MC jtpt = " << correctedPt << endl;
   }
-
+  if(!(mode == "pPb5" || mode == "Pbp5")) correctedPt = correctedPt*1.008;
   jtpt[j] = correctedPt;
   //std::cout << correctedPt << std::endl;
       /*
