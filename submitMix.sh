@@ -17,7 +17,9 @@ cp residualJEC.root $now
 cp jetJER.root $now
 cp fileLists/masterList.txt $now
 cp fileLists/masterMBList.txt $now
-cp L2L3VsPtEtaBinned_alphacut_high2_ak3PF_etacut3_dopPb0.root $now
+cp residualMCTruth/residualMCTruth.tar.gz $now
+cp JECDataDriven/JECDataDriven.tar.gz $now
+#cp L2L3VsPtEtaBinned_alphacut_high2_ak3PF_etacut3_dopPb0.root $now
 tar -cvzf $now/Corrections.tar.gz TrkCorr_*
 
 

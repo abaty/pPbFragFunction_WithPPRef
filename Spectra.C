@@ -276,6 +276,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
         }
       }
+
+      //pPb5 and Pbp5 activity weightings
+      if((strcmp(mode,"pPb5")==0) && isMC) weight = weight*MCTruth->getHFPbWeight(hiHFminusEta4);
+      if((strcmp(mode,"Pbp5")==0) && isMC) weight = weight*MCTruth->getHFPbWeight(hiHFplusEta4);
  
       //starting jet loop Reco
       for(int j=0; j<nref; j++)

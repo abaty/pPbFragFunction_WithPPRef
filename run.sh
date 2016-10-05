@@ -7,6 +7,8 @@ fi
 sleep $(($1/5))
 echo $HOSTNAME
 tar -xvf Corrections.tar.gz
+tar -xvf residualMCTruth.tar.gz
+tar -xvf JECDataDriven.tar.gz
 
 echo | awk -v i=$(($1/2)) -v j=$((($1%2)*3)) '{print "./run.exe masterList.txt masterMBList.txt "i" "j}' 
 echo | awk -v i=$(($1/2)) -v j=$((($1%2)*3)) '{print "./run.exe masterList.txt masterMBList.txt "i" "j}' | bash
