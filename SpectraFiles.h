@@ -50,6 +50,12 @@ TH1D * totalJetsChargeSumCut = new TH1D("totalJetsChargeSumCut","",2,-0.5,1.5);
 TH1D * totalJetsEtaCutHist = new TH1D("totalJetsEtaCutHist","",2,-0.5,1.5);
 TH1D * totalJetsPtCutHist = new TH1D("totalJetsPtCutHist","",2,-0.5,1.5);
 
+//checking framgnetation-dep of JEC
+TH2D * h_trackVsJEC;
+TH2D * h_trackVsJEC_weights;
+TProfile * h_JEC;
+TProfile * h_JEC_weights;
+
 TFile * inf, *infMix;
 TTree * track, *trackMix;
 TTree * ak3PF, *ak3PFMix;

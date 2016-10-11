@@ -105,7 +105,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   if(jobNum == -1)
   {
     //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
-    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/MC/ppref5jet80_1_20160824_5.root",0);
+    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/MC/ppref5jet80_1_20160824_5.root",1);
     if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5MB_0_20150227_0.root",0);
   }
   else{
@@ -168,6 +168,13 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_trackUE_gen_G = new TH2D("h_trackUE_gen_G","",nJetBins,0,300,ntrackBins-1,axis);
     h_track_xi_gen_G = new TH2D("h_track_xi_gen_G","",nJetBins,0,300,24,0,6.0);
     h_trackUE_xi_gen_G = new TH2D("h_trackUE_xi_gen_G","",nJetBins,0,300,24,0,6.0); 
+
+    const int trkVsJEC_jetBins = 9;
+    const double trkVsJEC_jetBinsAxis[trkVsJEC_jetBins+1] = {50,60,80,100,120,140,160,180,200,220};
+    h_trackVsJEC = new TH2D("h_trackVsJEC","",ntrackBins-1,axis,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
+    h_trackVsJEC_weights = new TH2D("h_trackVsJEC_weights","",ntrackBins-1,axis,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
+    h_JEC = new TProfile("h_JEC","",trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
+    h_JEC_weights = new TProfile("h_JEC_weights","",trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
   
     //boosting
     double boost = 0;
@@ -287,7 +294,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         totalJetsHist->Fill(1,weight);
         if(rawpt[j]<30) continue;
         totalJetsRawPtCut->Fill(1,weight);
-        if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        //if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > jetEtaMax) continue;
         totalJetsEtaCutHist->Fill(1,weight);
@@ -298,7 +306,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
           if(!isMC){
             jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
-            jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);
+            jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);// this is 1 right now
           }else{
             jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
           } 
@@ -313,25 +321,30 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         }
         else{
           jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
-          //constant shift of 1%
-          jtpt[j] = jtpt[j]*1.008;
           if(!isMC){
             jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
             jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);
           }else{
+            //constant shift of 0.8% in MC (not in data because is taken care of by L3Residual)
+            jtpt[j] = jtpt[j]*1.008;
             jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
-          } 
+          }
+          //smearing to match pPb resolution
+          jtpt[j] = getJERCorrected("ppref5",jtpt[j],getPPDataSmearFactor(jtpt[j])); 
 
           if(v==34) jtpt[j] = jtpt[j]*1.025;
           if(v==35) jtpt[j] = jtpt[j]*0.975;
           if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
         }
 
-
-
-        if(jtpt[j]<lowJetPtBound || jtpt[j]>=upJetPtBound) continue;      
+        //adding 10 GeV buffer here to the lowest bin
+        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
         totalJetsPtCutHist->Fill(1,weight);    
         h_jet->Fill(jtpt[j],weight);
+        if(isMC && refpt[j]>20){
+          h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
+          h_JEC_weights->Fill(refpt[j],weight);
+        }
   
       //quark or gluon only contributions for MC
         bool isQ = false;
@@ -340,7 +353,24 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(isMC && TMath::Abs(refparton_flavor[j])==21) isG=true;
         if(isQ) h_jet_Q->Fill(jtpt[j],weight);
         if(isG) h_jet_G->Fill(jtpt[j],weight);
-    
+   
+        //JEC thing here
+        /*float leadingHadronPt = 0;
+        for(int t=0; t<nTrk; t++){
+          if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
+          if(trkPt[t]<leadingHadronPt) continue;
+          if(trkPt[t] <= 1 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
+          //if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
+          //else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
+          if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3){
+            leadingHadronPt = trkPt[t];
+          }
+        }
+        if(isMC && refpt[j]>20){
+          h_trackVsJEC->Fill(leadingHadronPt,refpt[j],jtpt[j]/refpt[j]*weight);
+          h_trackVsJEC_weights->Fill(leadingHadronPt,refpt[j],weight);
+        }*/
+        if(jtpt[j]<lowJetPtBound  || jtpt[j]>=upJetPtBound) continue;
 
         for(int t=0; t<nTrk; t++)
         {
@@ -371,12 +401,13 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
 
             if(v==13) trkCorr=1; 
             if(std::isfinite(trkCorr))
-            {
+            {  
               totalRecoTRecoJ_Tracking->Fill(trkPt[t],weight*trkCorr);
               totalRecoTRecoJ_Tracking_eta->Fill(trkEta[t],weight*trkCorr);
               if(TMath::Abs(trkEta[t])>1.9)totalRecoTRecoJ_Tracking_largeEta->Fill(trkPt[t],weight*trkCorr);
               if(TMath::Abs(trkEta[t])<1.9)totalRecoTRecoJ_Tracking_lowEta->Fill(trkPt[t],weight*trkCorr);
               if(trkPt[t]>10)totalRecoTRecoJ_Tracking_largePt->Fill(trkEta[t],weight*trkCorr);
+
               h_track->Fill(jtpt[j],trkPt[t],trkCorr*weight);
               h_track_xi->Fill(jtpt[j],getXi(jtpt[j],jteta[j]+boost,jtphi[j],trkPt[t],trkEta[t]+boost,trkPhi[t]),trkCorr*weight);
               if(isQ)
@@ -569,6 +600,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           if(v==15 || v==17 || v==19)genpt[j] = genpt[j]*0.99;
           if(v==7 || v==8 || v==9)genpt[j] = getJERCorrected(mode,genpt[j],0.05);
           if(v==10 || v==11 || v==12)genpt[j] = getJERCorrected(mode,genpt[j],0.02);
+
+          //smearing gen to match reco resolution (for ratio comparisons to be fair)
+          //(smears to pPb resolution, first ppref5 is a dummy argument)
+          genpt[j] = getJERCorrected("ppref5",genpt[j],getGenMCSmearFactor("pPb5",genpt[j])); 
+
           if(TMath::Abs(geneta[j]+boost) < jetEtaMin || TMath::Abs(geneta[j]+boost) > jetEtaMax || genpt[j]<lowJetPtBound || genpt[j]>=upJetPtBound) continue;
           
           //getting jet flavor (a bit convoluted because genMatchedID is not filled in forest correctly)
@@ -828,7 +864,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_trackUE_gen_G->SetDirectory(0);
     h_track_xi_gen_G->SetDirectory(0);
     h_trackUE_xi_gen_G->SetDirectory(0);
-  
+    h_JEC->SetDirectory(0);  
+    h_JEC_weights->SetDirectory(0);  
+    h_trackVsJEC->SetDirectory(0);  
+    h_trackVsJEC_weights->SetDirectory(0);  
+
     h_jet->Write(Form("%s_reco_jet%s",mode,variationTag[v]));
     h_track->Write(Form("%s_reco_track%s",mode,variationTag[v]));
     h_trackUE->Write(Form("%s_reco_trackUE%s",mode,variationTag[v]));
@@ -867,6 +907,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_trackUE_gen_G->Write(Form("%s_gen_trackUE_G%s",mode,variationTag[v]));
     h_track_xi_gen_G->Write(Form("%s_gen_track_xi_G%s",mode,variationTag[v]));
     h_trackUE_xi_gen_G->Write(Form("%s_gen_trackUE_xi_G%s",mode,variationTag[v]));
+    h_trackVsJEC->Write(Form("%s_trackVsJEC_%s",mode,variationTag[v]));  
+    h_trackVsJEC_weights->Write(Form("%s_trackVsJEC_weights_%s",mode,variationTag[v]));  
+    h_JEC->Write(Form("%s_JEC_%s",mode,variationTag[v]));  
+    h_JEC_weights->Write(Form("%s_JEC_weights_%s",mode,variationTag[v]));  
     if(v==0)
     {
       totalEvts->Write();

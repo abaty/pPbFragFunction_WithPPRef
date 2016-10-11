@@ -46,6 +46,7 @@ class L2ResidualJES
      this->radius = radius;
      this->etacut = etacut;
      this->mode = mode;
+     this->dopPb = false;
      if(mode == "pPb5" || mode == "Pbp5") this->dopPb = true;
    
      algoCorr = Form("ak%dPF",radius);   

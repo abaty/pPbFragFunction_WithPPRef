@@ -45,3 +45,25 @@ double getJERCorrected(const char * mode, double jetpt, double percentage = 0.02
   return jetpt+TMath::Power(sigma2,0.5)*gaussJER->GetRandom();*/
   return jetpt+jetpt*percentage*gaussJER->GetRandom();
 }
+
+double getPPDataSmearFactor(float jtpt)
+{
+  float pPb1 = 2.065;
+  float pPb2 = 0.597;
+  float pp1 = 0.692;
+  float pp2 = 0.3746;
+  return (pPb1*TMath::Power(jtpt,-pPb2)-pp1*TMath::Power(jtpt,-pp2)>0)?TMath::Power(TMath::Power(pPb1*TMath::Power(jtpt,-pPb2),2)-TMath::Power(pp1*TMath::Power(jtpt,-pp2),2),0.5):0;
+}
+
+double getGenMCSmearFactor(const char * mode, float jtpt)
+{
+  float pPb1 = 2.065;
+  float pPb2 = 0.597;
+  float pp1 = 0.692;
+  float pp2 = 0.3746;
+  if(strcmp(mode,"ppref5")==0){
+    return pp1*TMath::Power(jtpt,-pp2);
+  }else{
+    return pPb1*TMath::Power(jtpt,-pPb2);
+  }
+}
