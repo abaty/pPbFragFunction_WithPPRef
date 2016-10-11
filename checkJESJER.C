@@ -142,12 +142,12 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   TH2D * h_trackVsJEC_weights[3];
   TH2D * h_trackVsJEC_z[3];
   TH2D * h_trackVsJEC_weights_z[3];
-  TH1D * h_trackVsJEC_1z[3];
-  TH1D * h_trackVsJEC_weights_1z[3];
+  TH1D * h_trackVsJEC_1z[3][3];
+  TH1D * h_trackVsJEC_weights_1z[3][3];
   const int ntrackBins=23;
   const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200};
-  const int ntrackBins_z=13;
-  const double axis_z[ntrackBins_z] = {0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2};
+  const int ntrackBins_z=11;
+  const double axis_z[ntrackBins_z] = {0.0,0.05,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1,1.2};
   const int trkVsJEC_jetBins = 9;
   const double trkVsJEC_jetBinsAxis[trkVsJEC_jetBins+1] = {50,60,80,100,120,140,160,180,200,220};
   for(int i = 0; i<3; i++){
@@ -155,8 +155,10 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
     h_trackVsJEC_weights[i] = new TH2D(Form("h_trackVsJEC_weights%d",i),"",ntrackBins-1,axis,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
     h_trackVsJEC_z[i] = new TH2D(Form("h_trackVsJEC%d_z",i),"",ntrackBins_z-1,axis_z,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
     h_trackVsJEC_weights_z[i] = new TH2D(Form("h_trackVsJEC_weights%d_z",i),"",ntrackBins_z-1,axis_z,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
-    h_trackVsJEC_1z[i] = new TH2D(Form("h_trackVsJEC%d_1z",i),"",ntrackBins_z-1,axis_z);
-    h_trackVsJEC_weights_1z[i] = new TH2D(Form("h_trackVsJEC_weights%d_1z",i),"",ntrackBins_z-1,axis_z);
+    for(int k = 0; k<3; k++){
+      h_trackVsJEC_1z[i][k] = new TH1D(Form("h_trackVsJEC%d_%d_1z",i,k),"",ntrackBins_z-1,axis_z);
+      h_trackVsJEC_weights_1z[i][k] = new TH1D(Form("h_trackVsJEC_weights%d_%d_1z",i,k),"",ntrackBins_z-1,axis_z);
+    }
   }
   
   for(int file = 0; file<4; file++){
@@ -301,7 +303,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   }else{   
    correctedPt = L2JER->getSmearedPt(correctedPt, jtetaT);
   }
-
+  
   //fragmentation stuff
   float leadingHadronPt = 0;
   if(doFragJEC){
@@ -321,8 +323,18 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
     h_trackVsJEC_weights[file]->Fill(leadingHadronPt,refpt[j],weight);
     h_trackVsJEC_z[file]->Fill(leadingHadronPt/refpt[j],refpt[j],jtpt[j]/refpt[j]*weight);
     h_trackVsJEC_weights_z[file]->Fill(leadingHadronPt/refpt[j],refpt[j],weight);
-    h_trackVsJEC_1z[file]->Fill(leadingHadronPt/refpt[j],jtpt[j]/refpt[j]*weight);
-    h_trackVsJEC_weights_1z[file]->Fill(leadingHadronPt/refpt[j],weight);
+    if(refpt[j]<100 && refpt[j]>=60){
+      h_trackVsJEC_1z[file][0]->Fill(leadingHadronPt/refpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][0]->Fill(leadingHadronPt/refpt[j],weight);
+    }
+    if(refpt[j]<140 && refpt[j]>=100){
+      h_trackVsJEC_1z[file][1]->Fill(leadingHadronPt/refpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][1]->Fill(leadingHadronPt/refpt[j],weight);
+    }
+    if(refpt[j]<200 && refpt[j]>=140){
+      h_trackVsJEC_1z[file][2]->Fill(leadingHadronPt/refpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][2]->Fill(leadingHadronPt/refpt[j],weight);
+    }
   }
   }
 
@@ -409,8 +421,12 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
       h_trackVsJEC[file]->Print("All");
       h_trackVsJEC_z[file]->Divide(h_trackVsJEC_weights_z[file]);
       h_trackVsJEC_z[file]->Print("All");
-      h_trackVsJEC_1z[file]->Divide(h_trackVsJEC_weights_1z[file]);
-      h_trackVsJEC_1z[file]->Print("All");
+      h_trackVsJEC_1z[file][0]->Divide(h_trackVsJEC_weights_1z[file][0]);
+      h_trackVsJEC_1z[file][0]->Print("All");
+      h_trackVsJEC_1z[file][1]->Divide(h_trackVsJEC_weights_1z[file][1]);
+      h_trackVsJEC_1z[file][1]->Print("All");
+      h_trackVsJEC_1z[file][2]->Divide(h_trackVsJEC_weights_1z[file][2]);
+      h_trackVsJEC_1z[file][2]->Print("All");
     }
   }//end file loop
   out->Write();
@@ -490,6 +506,31 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
     else additionalSmearingPP = 0;
     std::cout << "Additional smearing for bin " << r << ": " << additionalSmearingPP <<std::endl;
   }
+
+  c1->SetLogx(0);
+  c1->SetLogy(0);
+  TLegend * leg3 = new TLegend(0.3,0.15,0.6,0.4);
+  leg3->SetBorderSize(0);
+  for(int file=0; file<3; file++){
+    h_trackVsJEC_1z[file][0]->Draw();
+    h_trackVsJEC_1z[file][0]->GetXaxis()->SetTitle("Leading ch. particle Z (p_{T}^{trk}/p_{T}^{gen jet})");
+    h_trackVsJEC_1z[file][0]->GetYaxis()->SetTitle("p_{T}^{reco}/p_{T}^{gen}");
+    h_trackVsJEC_1z[file][1]->SetMarkerColor(kBlue);
+    h_trackVsJEC_1z[file][1]->SetLineColor(kBlue);
+    h_trackVsJEC_1z[file][1]->Draw("same");
+    h_trackVsJEC_1z[file][2]->SetMarkerColor(kRed);
+    h_trackVsJEC_1z[file][2]->SetLineColor(kRed);
+    h_trackVsJEC_1z[file][2]->Draw("same");
+
+    if(file==0){
+      leg3->AddEntry(h_trackVsJEC_1z[file][0],"60 < p_{T}^{jet} < 100 GeV","p");
+      leg3->AddEntry(h_trackVsJEC_1z[file][1],"100 < p_{T}^{jet} < 140 GeV","p");
+      leg3->AddEntry(h_trackVsJEC_1z[file][2],"140 < p_{T}^{jet} < 200 GeV","p");
+    }
+    leg3->Draw("same");
+    c1->SaveAs(Form("checkJESJERPlots/JEC_vs_Z_%d.png",file)); 
+    c1->SaveAs(Form("checkJESJERPlots/JEC_vs_Z_%d.pdf",file)); 
+  } 
 
   /*delete *L2JES; 
   delete *L2JER; 

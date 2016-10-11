@@ -67,3 +67,27 @@ double getGenMCSmearFactor(const char * mode, float jtpt)
     return pPb1*TMath::Power(jtpt,-pPb2);
   }
 }
+
+double getFragJECFactor(const char * mode, float leadingPart, float jtpt)
+{
+  float z = leadingPart/jtpt;
+  float Pbp0 = 0.933;
+  float Pbp1 = 0.383;
+  float Pbp2 = -0.35;
+  float pPb0 = 0.938;
+  float pPb1 = 0.374;
+  float pPb2 = -0.286;
+  float pp0 = 0.9261;
+  float pp1 = 0.3784;
+  float pp2 = -0.2702;
+  if(z>1.2) return jtpt;
+  if(strcmp(mode,"ppref5")==0){
+    return jtpt*(pp0+pp1*z+pp2*z*z);
+  }else if(strcmp(mode,"pPb5")==0){
+    return jtpt*(pPb0+pPb1*z+pPb2*z*z);
+  }else if(strcmp(mode,"Pbp5")==0){
+    return jtpt*(Pbp0+Pbp1*z+Pbp2*z*z);
+  }else{
+    return jtpt;
+  }
+}
