@@ -310,11 +310,15 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           }else{
             jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
           } 
-          if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-          if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          //if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
+          if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]*1.03;
+          //if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]*1.02;
           //if(v==14 || v==16 || v==18)jtpt[j] = jtpt[j]*1.01;
-          if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-          if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          //if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
+          if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]*0.97;
+          //if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
+          if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]*0.98;
           //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
           if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
           if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
@@ -329,33 +333,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             jtpt[j] = jtpt[j]*1.008;
             jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
           }
-          //smearing to match pPb resolution
-          jtpt[j] = getJERCorrected("ppref5",jtpt[j],getPPDataSmearFactor(jtpt[j])); 
-
-          if(v==34) jtpt[j] = jtpt[j]*1.025;
-          if(v==35) jtpt[j] = jtpt[j]*0.975;
-          if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
         }
-
-        //adding 10 GeV buffer here to the lowest bin
-        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
-        totalJetsPtCutHist->Fill(1,weight);    
-        h_jet->Fill(jtpt[j],weight);
-        if(isMC && refpt[j]>20){
-          h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
-          h_JEC_weights->Fill(refpt[j],weight);
-        }
-  
-      //quark or gluon only contributions for MC
-        bool isQ = false;
-        bool isG = false;
-        if(isMC && TMath::Abs(refparton_flavor[j])<901 && TMath::Abs(refparton_flavor[j])!=21) isQ=true;
-        if(isMC && TMath::Abs(refparton_flavor[j])==21) isG=true;
-        if(isQ) h_jet_Q->Fill(jtpt[j],weight);
-        if(isG) h_jet_G->Fill(jtpt[j],weight);
-   
+ 
+        /*
         //JEC thing here
-        /*float leadingHadronPt = 0;
+        float leadingHadronPt = 0;
         for(int t=0; t<nTrk; t++){
           if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
           if(trkPt[t]<leadingHadronPt) continue;
@@ -369,7 +351,40 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(isMC && refpt[j]>20){
           h_trackVsJEC->Fill(leadingHadronPt,refpt[j],jtpt[j]/refpt[j]*weight);
           h_trackVsJEC_weights->Fill(leadingHadronPt,refpt[j],weight);
+        }
+        if(strcmp(mode,"ppref5")==0) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
+        if(strcmp(mode,"pPb5")==0) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
+        if(strcmp(mode,"Pbp5")==0) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);
+        //end FF correction
+        */ 
+
+        if(strcmp(mode,"ppref5")==0){
+          //smearing to match pPb resolution
+          jtpt[j] = getJERCorrected("ppref5",jtpt[j],getPPDataSmearFactor(jtpt[j])); 
+
+          if(v==34) jtpt[j] = jtpt[j]*1.025;
+          if(v==35) jtpt[j] = jtpt[j]*0.975;
+          if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
+        }
+
+        //adding 10 GeV buffer here to the lowest bin
+        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
+        totalJetsPtCutHist->Fill(1,weight);    
+        h_jet->Fill(jtpt[j],weight);
+        /*if(isMC && refpt[j]>20){
+          h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
+          h_JEC_weights->Fill(refpt[j],weight);
         }*/
+  
+      //quark or gluon only contributions for MC
+        bool isQ = false;
+        bool isG = false;
+        if(isMC && TMath::Abs(refparton_flavor[j])<901 && TMath::Abs(refparton_flavor[j])!=21) isQ=true;
+        if(isMC && TMath::Abs(refparton_flavor[j])==21) isG=true;
+        if(isQ) h_jet_Q->Fill(jtpt[j],weight);
+        if(isG) h_jet_G->Fill(jtpt[j],weight);
+   
+
         if(jtpt[j]<lowJetPtBound  || jtpt[j]>=upJetPtBound) continue;
 
         for(int t=0; t<nTrk; t++)
@@ -594,13 +609,15 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
  
           if(v==1 || v==3 || v==5)genpt[j] = genpt[j]*1.03;
           if(v==20 || v==22 || v==24)genpt[j] = genpt[j]*1.02;
-          if(v==14 || v==16 || v==18)genpt[j] = genpt[j]*1.01;
+          //if(v==14 || v==16 || v==18)genpt[j] = genpt[j]*1.01;
           if(v==2 || v==4 || v==6)genpt[j] = genpt[j]*0.97; 
           if(v==21 || v==23 || v==25)genpt[j] = genpt[j]*0.98;
-          if(v==15 || v==17 || v==19)genpt[j] = genpt[j]*0.99;
+          //if(v==15 || v==17 || v==19)genpt[j] = genpt[j]*0.99;
           if(v==7 || v==8 || v==9)genpt[j] = getJERCorrected(mode,genpt[j],0.05);
           if(v==10 || v==11 || v==12)genpt[j] = getJERCorrected(mode,genpt[j],0.02);
-
+          if(v==34) genpt[j] = genpt[j]*1.025;
+          if(v==35) genpt[j] = genpt[j]*0.975;
+          if(v==36) genpt[j] = getJERCorrected("pPb5",genpt[j],0.05); 
           //smearing gen to match reco resolution (for ratio comparisons to be fair)
           //(smears to pPb resolution, first ppref5 is a dummy argument)
           genpt[j] = getJERCorrected("ppref5",genpt[j],getGenMCSmearFactor("pPb5",genpt[j])); 

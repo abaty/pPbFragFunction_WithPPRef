@@ -82,11 +82,11 @@ double getFragJECFactor(const char * mode, float leadingPart, float jtpt)
   float pp2 = -0.2702;
   if(z>1.2) return jtpt;
   if(strcmp(mode,"ppref5")==0){
-    return jtpt*(pp0+pp1*z+pp2*z*z);
+    return jtpt/(pp0+pp1*z+pp2*z*z);
   }else if(strcmp(mode,"pPb5")==0){
-    return jtpt*(pPb0+pPb1*z+pPb2*z*z);
+    return jtpt/(pPb0+pPb1*z+pPb2*z*z);
   }else if(strcmp(mode,"Pbp5")==0){
-    return jtpt*(Pbp0+Pbp1*z+Pbp2*z*z);
+    return jtpt/(Pbp0+Pbp1*z+Pbp2*z*z);
   }else{
     return jtpt;
   }

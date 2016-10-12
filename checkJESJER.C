@@ -7,7 +7,7 @@
 #include "TTree.h"
 #include "TF1.h"
 #include "TLegend.h"
-
+#include "TProfile.h"
 //#include "residualJEC.h"
 //#include "jetSmearing.h"
 //#include "getJEC_2nd.h"
@@ -144,6 +144,8 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   TH2D * h_trackVsJEC_weights_z[3];
   TH1D * h_trackVsJEC_1z[3][3];
   TH1D * h_trackVsJEC_weights_1z[3][3];
+  TProfile * h_fakeVsChargeSum[3];
+  TH1D * h_neutralSum[3];
   const int ntrackBins=23;
   const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200};
   const int ntrackBins_z=11;
@@ -159,6 +161,8 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
       h_trackVsJEC_1z[i][k] = new TH1D(Form("h_trackVsJEC%d_%d_1z",i,k),"",ntrackBins_z-1,axis_z);
       h_trackVsJEC_weights_1z[i][k] = new TH1D(Form("h_trackVsJEC_weights%d_%d_1z",i,k),"",ntrackBins_z-1,axis_z);
     }
+    h_fakeVsChargeSum[i] = new TProfile(Form("h_fakeVsChargeSum_%d",i),"",20,0,1);
+    h_neutralSum[i] = new TH1D(Form("h_neutralSum_%d",i),"",20,0,1);
   }
   
   for(int file = 0; file<4; file++){
@@ -196,6 +200,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   int ngen;
   float rawpt[1000];
   float chargedSum[1000];
+  float neutralSum[1000];
   float chargedMax[1000];
   float jtpt[1000];
   float jteta[1000];
@@ -226,6 +231,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   t->SetBranchAddress("pthat",&pthat);
   t->SetBranchAddress("rawpt",&rawpt);
   t->SetBranchAddress("chargedSum",&chargedSum);
+  t->SetBranchAddress("neutralSum",&neutralSum);
   t->SetBranchAddress("chargedMax",&chargedMax);
   t->SetBranchAddress("jtpt",&jtpt);
   t->SetBranchAddress("jteta",&jteta);
@@ -305,7 +311,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
   }
   
   //fragmentation stuff
-  float leadingHadronPt = 0;
+  /*float leadingHadronPt = 0;
   if(doFragJEC){
   for(int t=0; t<nTrk; t++){
     if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
@@ -316,7 +322,13 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
     if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3){
       leadingHadronPt = trkPt[t];
     }
-  }
+  }*/
+
+  //FF experiment:
+  /*if(file==0 || file==4) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
+  if(file==1) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
+  if(file==2) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);*/
+  /*
   if(doMC && refpt[j]>20){
     float weight = crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4);
     h_trackVsJEC[file]->Fill(leadingHadronPt,refpt[j],jtpt[j]/refpt[j]*weight);
@@ -336,13 +348,22 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
       h_trackVsJEC_weights_1z[file][2]->Fill(leadingHadronPt/refpt[j],weight);
     }
   }
-  }
-
+  }*/
+  //FF experiment:
+  /*if(file==0 || file==4) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
+  if(file==1) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
+  if(file==2) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);*/
+  
   jtpt[j] = correctedPt;
 
   //smearing pp to match pPb
   float smearedJtPt = jtpt[j];
   if(file==0) smearedJtPt = getJERCorrected("pp5",jtpt[j],getPPDataSmearFactor(jtpt[j]));
+  
+  if(jtpt[j]>60 && jtpt[j]<200){
+    h_fakeVsChargeSum[file]->Fill(chargedSum[j]/rawpt[j],((refpt[j]<0)?1:0),crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4));
+    h_neutralSum[file]->Fill(neutralSum[j]/rawpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4));
+  }
 
       int bin = -1;
       /*if(jtpt[j]>=60) bin=0;
@@ -372,7 +393,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true){
       //std::cout << smearedJtPt << std::endl;
       //std::cout << "test" << std::endl;
 
-      if(leadingHadronPt/jtpt[j]<0.5) continue;
+      if(chargedMax[j]/jtpt[j]<0.5) continue;
       else{
         res_hard[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
         if(file==0) res_hard[bin][3]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
