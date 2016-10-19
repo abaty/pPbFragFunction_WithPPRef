@@ -158,7 +158,8 @@ class L2ResidualJER
     TF1 *fitSF[2];
     TF1 *fitGaus;
 	
-    const double ptLow = 50;
+    //const double ptLow = 50;
+    const double ptLow = 45;
     const double ptHigh = 400;
 	const double etaBound = 1.3;
 	const double etaMax = 3.;

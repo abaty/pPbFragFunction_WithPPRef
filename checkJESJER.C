@@ -122,21 +122,23 @@ void FitGauss(TH1D* hist_p, Bool_t isPbPb, float& mean, float& meanErr, float& r
   return;
 }
 
-void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins = false, bool dojtpt = false){
+void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins = false, bool dojtpt = false, bool showMore = false){
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
 
-  TH1D * res[30][4];
-  TH1D * res_hard[30][4];
+  TH1D * res[60][4];
+  TH1D * res_hard[60][4];
   TH1D * meanPP[4];
   TH1D * resoPP[4];
   TH1D * meanPP_hard[4];
   TH1D * resoPP_hard[4];
 
-  int pthats[6] = {50,80,120,170,220,280};
-  double crossSection5[6]  = {3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07};
+  int pthats[7] = {30,50,80,120,170,220,280};
+  double crossSection5[7]  = {3.378E-02,3.778E-03,4.412E-04,6.147E-05,1.018E-05,2.477E-06,6.160E-07};
 
   TFile * out = TFile::Open("checkJESJER.root","recreate");
+  TH1D * pthatP[3];
+  pthatP[0]  = new TH1D("pthatp0","",100,0,200);
   
   TH2D * h_trackVsJEC[3];
   TH2D * h_trackVsJEC_weights[3];
@@ -168,7 +170,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   for(int file = 0; file<4; file++){
   if(file<3){//file==3 skip to plotting step
   std::cout << file << std::endl;
-  for(int file2= 0; file2<6; file2++){
+  for(int file2= 0; file2<5; file2++){
   std::cout << file2 << std::endl;
 //for pp
   int radius = 3;
@@ -184,17 +186,19 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   L3ResidualJES * L3JES = new L3ResidualJES(mode);
   MCTruthResidual * MCTruth = new MCTruthResidual(mode);
  
+
   TFile * f;
+  if(file2==0 && (!doFineBins || file==0 || file==4)) continue;
   //if(file2>=4) continue;
   //if(file==0) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet%d_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root",pthats[file2]),"read");//pythia 8
   if(file==0) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/abaty/mergedForests/Pythia6_Dijet%d_pp5TeV/0.root",pthats[file2]),"read");//pythia 6
 //for pPb
   if(doFragJEC){
-  if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/pPb/HP04/prod16/Hijing_Pythia_pt%d/HiForest_v77_merged01/pt%d_HP04_prod16_v77_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
-  if(file==2 && file2<4) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/Pbp/HP05/prod24/Hijing_Pythia_pt%d/HiForest_v84_merged02/pt%d_HP05_prod24_v84_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
+    if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/pPb/HP04/prod16/Hijing_Pythia_pt%d/HiForest_v77_merged01/pt%d_HP04_prod16_v77_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
+    if(file==2 && file2<4) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/Pbp/HP05/prod24/Hijing_Pythia_pt%d/HiForest_v84_merged02/pt%d_HP05_prod24_v84_merged_forest_0.root",pthats[file2],pthats[file2]),"read");
   }else{
-  if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_pPbDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
-  if(file==2) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_PbpDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
+    if(file==1) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_pPbDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
+    if(file==2) f = TFile::Open(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForestpPb/MC/HiForest_PbpDir_QCD%d_pythia6_HiWinter13.root",pthats[file2]),"read");
   }
   if(doFragJEC && file==2 && file2>=4) continue;
   TTree * t = (TTree*)f->Get("ak3PFJetAnalyzer/t");
@@ -268,7 +272,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   if(file==1 || file==2) t->AddFriend(hi);
   if(doFragJEC) t->AddFriend(trk);
  
-  for(int i = 0; i< (doFineBins?30:(doMoreBins?9:5)) ; i++){
+  for(int i = 0; i< (doFineBins?60:(doMoreBins?9:5)) ; i++){
     std::cout << i << std::endl;
     res[i][file] = new TH1D(Form("res%d%d",i,file),"",30,0.6,1.4);
     res_hard[i][file] = new TH1D(Form("res_hard%d%d",i,file),"",30,0.6,1.4);
@@ -280,10 +284,12 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
  
   for(int i = 0; i<t->GetEntries(); i++){
     t->GetEntry(i);
+    if(pthat>pthats[file2+1]) continue;
+    if(file==0) pthatP[0]->Fill(pthat,crossSection5[file2]/t->GetEntries());
     if(i%1000==0) std::cout << i << "/" << t->GetEntries() << std::endl;
     for(int j = 0; j<nref; j++){
       float boost = 0;
-      if(pthat > 2*pthats[file2]) continue;
+      //if(pthat > 2*pthats[file2]) continue;
       if(file==1) boost = 0.4654094531;
       if(file==2) boost = -0.4654094531;
       if(TMath::Abs(jteta[j]+boost)>1.5) continue;
@@ -396,9 +402,9 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
       if(refpt[j]<60 || refpt[j]>440 || (!doMoreBins && refpt[j]>=200)) bin=-1;
 
       if(doFineBins){
-        for(int b = 0; b<30; b++){
-          if(refpt[j]>=50+5*b) bin=b;
-          if(refpt[j]<50 || refpt[j]>=200) bin=-1;
+        for(int b = 0; b<60; b++){
+          if(refpt[j]>=50+250.0/60.0*b) bin=b;
+          if(refpt[j]<50 || refpt[j]>=300) bin=-1;
         }
       }
 
@@ -415,28 +421,28 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
       if(jtpt[j]<60 || jtpt[j]>440 || (!doMoreBins && jtpt[j]>=200)) bin=-1;
 
       if(doFineBins){
-        for(int b = 0; b<30; b++){
-          if(jtpt[j]>=50+5*b) bin=b;
-          if(jtpt[j]<50 || jtpt[j]>=200) bin=-1;
+        for(int b = 0; b<60; b++){
+          if(jtpt[j]>=50+250.0/60.0*b) bin=b;
+          if(jtpt[j]<50 || jtpt[j]>=300) bin=-1;
           }
         }
       }
 
       if(bin == -1) continue;
-      //std::cout << "test" << std::endl;
-      //std::cout << jtpt[j]/refpt[j] << " " << crossSection5[file2]/t->GetEntries() << std::endl;
-      //std::cout << bin << " " << file << std::endl;
-      //std::cout << smearedJtPt << std::endl;
+      if(file==1 || file==2){
         res[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4));
-        //std::cout << smearedJtPt << std::endl;
-        if(file==0) res[bin][3]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4));
-        //std::cout << smearedJtPt << std::endl;
-        //std::cout << "test" << std::endl;
+      }else{
+        res[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries());
+        res[bin][3]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries());
+      }
 
         if(chargedMax[j]/jtpt[j]<0.5) continue;
         else{
-          res_hard[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
-          if(file==0) res_hard[bin][3]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
+          if(file==1 || file==2) res_hard[bin][file]->Fill(jtpt[j]/refpt[j],crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4)); 
+          else{
+            res_hard[bin][0]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries()); 
+            res_hard[bin][3]->Fill(smearedJtPt/refpt[j],crossSection5[file2]/t->GetEntries()); 
+          }
         }
       }
       //std::cout << "test" << std::endl;
@@ -450,19 +456,19 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   double jtptBins[jtptBin+1] = {60,80,100,120,140,200};
   const int jtptBinMore = 9;
   double jtptBinsMore[jtptBinMore+1] = {60,80,100,120,140,200,260,320,380,440};
-  const int jtptBinFine = 30;
+  const int jtptBinFine = 60;
   if(!doFineBins){
     meanPP[file] = new TH1D(Form("meanPP%d",file),"",doMoreBins?jtptBinMore:jtptBin,doMoreBins?jtptBinsMore:jtptBins);
     resoPP[file] = new TH1D(Form("resoPP%d",file),"",doMoreBins?jtptBinMore:jtptBin,doMoreBins?jtptBinsMore:jtptBins);
     meanPP_hard[file] = new TH1D(Form("meanPP_hard%d",file),"",doMoreBins?jtptBinMore:jtptBin,doMoreBins?jtptBinsMore:jtptBins);
     resoPP_hard[file] = new TH1D(Form("resoPP_hard%d",file),"",doMoreBins?jtptBinMore:jtptBin,doMoreBins?jtptBinsMore:jtptBins);
   }else{
-    meanPP[file] = new TH1D(Form("meanPP%d",file),"",jtptBinFine,50,200);
-    resoPP[file] = new TH1D(Form("resoPP%d",file),"",jtptBinFine,50,200);
-    meanPP_hard[file] = new TH1D(Form("meanPP_hard%d",file),"",jtptBinFine,50,200);
-    resoPP_hard[file] = new TH1D(Form("resoPP_hard%d",file),"",jtptBinFine,50,200);
+    meanPP[file] = new TH1D(Form("meanPP%d",file),"",jtptBinFine,50,300);
+    resoPP[file] = new TH1D(Form("resoPP%d",file),"",jtptBinFine,50,300);
+    meanPP_hard[file] = new TH1D(Form("meanPP_hard%d",file),"",jtptBinFine,50,300);
+    resoPP_hard[file] = new TH1D(Form("resoPP_hard%d",file),"",jtptBinFine,50,300);
   }
-  for(int j = 0; j<(doFineBins?30:(doMoreBins?9:5)); j++){
+  for(int j = 0; j<(doFineBins?60:(doMoreBins?9:5)); j++){
     float mean=0, meanErr=0, reso=0, resoErr=0;      
     FitGauss(res[j][file],0,mean,meanErr,reso,resoErr);
     std::cout << mean << " " << meanErr << " " << reso << " " << resoErr << std::endl;
@@ -471,7 +477,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
     resoPP[file]->SetBinContent(j+1,reso);
     resoPP[file]->SetBinError(j+1,resoErr);
   }
-  for(int j = 0; j<(doFineBins?30:(doMoreBins?9:5)); j++){
+  for(int j = 0; j<(doFineBins?60:(doMoreBins?9:5)); j++){
     float mean=0, meanErr=0, reso=0, resoErr=0;      
     FitGauss(res_hard[j][file],0,mean,meanErr,reso,resoErr);
     std::cout << mean << " " << meanErr << " " << reso << " " << resoErr << std::endl;
@@ -506,12 +512,18 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   if(dojtpt) meanPP[0]->GetXaxis()->SetTitle("p_{T}^{reco}");
   meanPP[0]->GetXaxis()->SetRangeUser(60,200);
   if(doMoreBins) meanPP[0]->GetXaxis()->SetRangeUser(60,440);
+  if(doFineBins && showMore) meanPP[0]->GetXaxis()->SetRangeUser(50,300);
   meanPP[0]->Draw();
   meanPP[1]->SetMarkerColor(kRed);
+  meanPP[1]->SetMarkerStyle(24);
+  meanPP[1]->SetLineColor(kRed);
   meanPP[1]->Draw("same p");
   meanPP[2]->SetMarkerColor(kBlue);
+  meanPP[2]->SetMarkerStyle(24);
+  meanPP[2]->SetLineColor(kBlue);
   meanPP[2]->Draw("same p");
-  meanPP[3]->SetMarkerColor(kBlack);
+  meanPP[3]->SetMarkerColor(kGreen);
+  meanPP[3]->SetLineColor(kGreen);
   meanPP[3]->SetMarkerStyle(24);
   meanPP[3]->Draw("same p");
   TLegend * leg1 = new TLegend(0.5,0.7,0.8,0.9);
@@ -526,13 +538,19 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   resoPP[0]->GetXaxis()->SetTitle("p_{T}^{gen}");
   if(dojtpt) resoPP[0]->GetXaxis()->SetTitle("p_{T}^{reco}");
   resoPP[0]->GetXaxis()->SetRangeUser(60,200);
+  if(doFineBins && showMore) resoPP[0]->GetXaxis()->SetRangeUser(50,300);
   if(doMoreBins) resoPP[0]->GetXaxis()->SetRangeUser(60,440);
   resoPP[0]->Draw();
   resoPP[1]->SetMarkerColor(kRed);
+  resoPP[1]->SetMarkerStyle(24);
+  resoPP[1]->SetLineColor(kRed);
   resoPP[1]->Draw("same p");
   resoPP[2]->SetMarkerColor(kBlue);
+  resoPP[2]->SetMarkerStyle(24);
+  resoPP[2]->SetLineColor(kBlue);
   resoPP[2]->Draw("same p");
-  resoPP[3]->SetMarkerColor(kBlack);
+  resoPP[3]->SetMarkerColor(kGreen);
+  resoPP[3]->SetLineColor(kGreen);
   resoPP[3]->SetMarkerStyle(24);
   resoPP[3]->Draw("same p");
   leg1->Draw("same");
@@ -541,6 +559,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   meanPP_hard[0]->GetXaxis()->SetTitle("p_{T}^{gen}");
   if(dojtpt) meanPP_hard[0]->GetXaxis()->SetTitle("p_{T}^{reco}");
   if(doMoreBins) meanPP_hard[0]->GetXaxis()->SetRangeUser(60,440);
+  if(doFineBins && showMore) meanPP_hard[0]->GetXaxis()->SetRangeUser(50,300);
   meanPP_hard[0]->Draw();
   meanPP_hard[1]->SetMarkerColor(kRed);
   meanPP_hard[1]->Draw("same p");
@@ -555,6 +574,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   resoPP_hard[0]->GetXaxis()->SetTitle("p_{T}^{gen}");
   if(dojtpt) resoPP_hard[0]->GetXaxis()->SetTitle("p_{T}^{reco}");
   if(doMoreBins) resoPP_hard[0]->GetXaxis()->SetRangeUser(60,440);
+  if(doFineBins && showMore) resoPP_hard[0]->GetXaxis()->SetRangeUser(50,300);
   resoPP_hard[0]->Draw();
   resoPP_hard[1]->SetMarkerColor(kRed);
   resoPP_hard[1]->Draw("same p");
@@ -578,12 +598,33 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   TH1D * resoPPForFit = (TH1D*)resoPP[2]->Clone("resoPPforFit");
   resoPPForFit->Fit("PbpFit","EMRI same");  
 
-  for(int r = 1; r<6; r++){
+  TH1D * addSmear = (TH1D*)resoPPForFit->Clone("additionalSmearing"); 
+  addSmear->Reset();
+  if(doFineBins){
+  for(int r = 1; r<60; r++){
     float additionalSmearingPP;
-    if((resoPP[1]->GetBinContent(r)*0.71+resoPP[2]->GetBinContent(r)*1.29)/2.0-resoPP[0]->GetBinContent(r) > 0) additionalSmearingPP = TMath::Power(TMath::Power((resoPP[1]->GetBinContent(r)*0.71+resoPP[2]->GetBinContent(r)*1.29)/2.0,2)-TMath::Power(resoPP[0]->GetBinContent(r),2),0.5);
-    else additionalSmearingPP = 0;
+    additionalSmearingPP = TMath::Power(TMath::Abs(TMath::Power((resoPP[1]->GetBinContent(r)*0.71+resoPP[2]->GetBinContent(r)*1.29)/2.0,2)-TMath::Power(resoPP[0]->GetBinContent(r),2)),0.5);
+    if(!((resoPP[1]->GetBinContent(r)*0.71+resoPP[2]->GetBinContent(r)*1.29)/2.0-resoPP[0]->GetBinContent(r) > 0)) additionalSmearingPP = -additionalSmearingPP;
+    addSmear->SetBinContent(r,additionalSmearingPP);
+    addSmear->SetBinError(r,0);
     std::cout << "Additional smearing for bin " << r << ": " << additionalSmearingPP <<std::endl;
   }
+  
+  float previousBin[65] = {0};
+  for(int r = 1; r<60; r++){
+    if(r==1){
+      previousBin[r] = addSmear->GetBinContent(r);
+      addSmear->SetBinContent(r,(2*previousBin[r]+addSmear->GetBinContent(r+1))/3.0);
+    }else if(r>1 && r<59){
+      previousBin[r] = addSmear->GetBinContent(r);
+      addSmear->SetBinContent(r,(previousBin[r-1]+previousBin[r]+addSmear->GetBinContent(r+1))/3.0);
+    }else{
+      addSmear->SetBinContent(r,(previousBin[r-1]+addSmear->GetBinContent(r)*2)/3.0);
+    } 
+  }
+  }
+  addSmear->SetDirectory(out);
+  out->Write();
 
   c1->SetLogx(0);
   c1->SetLogy(0);
