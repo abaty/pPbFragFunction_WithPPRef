@@ -12,11 +12,12 @@ TF1 * gaussJER;
 
 void initializeJER()
 {
-  TFile * JERFile = TFile::Open("jetJER.root","read");
+  /*TFile * JERFile = TFile::Open("jetJER.root","read");
   JER_pp2 = (TH1D*) JERFile->Get("pp2_JER"); 
   JER_pp7 = (TH1D*) JERFile->Get("pp7_JER");
   JER_pPb5 = (TH1D*) JERFile->Get("pPb5_JER");
- 
+  */ 
+
   gaussJER = new TF1("gausJER","gaus(0)",-20,20);
   gaussJER->SetParameters(1,0,1);
 
@@ -48,23 +49,41 @@ double getJERCorrected(const char * mode, double jetpt, double percentage = 0.02
 
 double getPPDataSmearFactor(float jtpt)
 {
-  float pPb1 = 2.065;
-  float pPb2 = 0.597;
-  float pp1 = 0.692;
-  float pp2 = 0.3746;
+  if(jtpt<50) return 0;
+  float pp1 = 0.554;
+  float pp2 = 0.327;
+  float pPb1 = 0.919;
+  float pPb2 = 0.429;
+  float Pbp1 = 0.565;
+  float Pbp2 = 0.337;
+  return ((pPb1*TMath::Power(jtpt,-pPb2)*0.71+Pbp1*TMath::Power(jtpt,-Pbp2)*1.29)/2.0-pp1*TMath::Power(jtpt,-pp2)>0)?(pPb1*TMath::Power(jtpt,-pPb2)*0.71+Pbp1*TMath::Power(jtpt,-Pbp2)*1.29)/2.0-pp1*TMath::Power(jtpt,-pp2):0;
+  /*float pPb1 = ;
+  float pPb2 = 0.534;
+  float Pbp1 = ;
+  float Pbp2 = 0.534;
+  float pp1 = 0.704;
+  float pp2 = 0.381;
   return (pPb1*TMath::Power(jtpt,-pPb2)-pp1*TMath::Power(jtpt,-pp2)>0)?TMath::Power(TMath::Power(pPb1*TMath::Power(jtpt,-pPb2),2)-TMath::Power(pp1*TMath::Power(jtpt,-pp2),2),0.5):0;
+  */
 }
 
 double getGenMCSmearFactor(const char * mode, float jtpt)
 {
-  float pPb1 = 2.065;
-  float pPb2 = 0.597;
-  float pp1 = 0.692;
-  float pp2 = 0.3746;
+  if(jtpt<50) return 0;
+  float pp1 = 0.704;
+  float pp2 = 0.381;
+  float pPb1 = 1.42;
+  float pPb2 = 0.521;
+  float Pbp1 = 1.21;
+  float Pbp2 = 0.501;
   if(strcmp(mode,"ppref5")==0){
     return pp1*TMath::Power(jtpt,-pp2);
-  }else{
+  }else if(strcmp(mode,"pPb5")==0){
     return pPb1*TMath::Power(jtpt,-pPb2);
+  }else if(strcmp(mode,"Pbp5")==0){
+    return Pbp1*TMath::Power(jtpt,-Pbp2);
+  }else{
+    return 0;
   }
 }
 

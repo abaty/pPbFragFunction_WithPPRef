@@ -53,6 +53,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     return;
   }
 
+  bool doMidRapidity = false;
+
   TH1::SetDefaultSumw2();
   TH2::SetDefaultSumw2(); 
   TDatime * dateTime = new TDatime();
@@ -118,7 +120,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29),(strcmp(mode,"ppref5")==0 &&  isMC)?1:0);
   
-    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==12 || v==13 || v==24 || v==25 || v==26 || v==27 || v==28 || v==29 || v==30 || v==34 || v==35 || v==36)) continue;
+    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==34 || v==35 || v==36)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==2 && (v!=0)) continue;
 
@@ -297,7 +299,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         //if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
-        if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > jetEtaMax) continue;
+        if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
         totalJetsEtaCutHist->Fill(1,weight);
   
       //JEC and its corrections applied
@@ -313,15 +315,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           //if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
           if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]*1.03;
           //if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
-          if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]*1.02;
-          //if(v==14 || v==16 || v==18)jtpt[j] = jtpt[j]*1.01;
           //if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
           if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]*0.97;
           //if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
-          if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]*0.98;
-          //if(v==15 || v==17 || v==19)jtpt[j] = jtpt[j]*0.99;
           if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
-          if(v==10 || v==11 || v==12)jtpt[j] = getJERCorrected(mode,jtpt[j],0.02);
         }
         else{
           jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
@@ -366,11 +363,12 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           if(v==35) jtpt[j] = jtpt[j]*0.975;
           if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
         }
+        //checking fake jet contribution
+        //if(isMC && refpt[j]<0) continue;
 
         //adding 10 GeV buffer here to the lowest bin
-        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
         totalJetsPtCutHist->Fill(1,weight);    
-        h_jet->Fill(jtpt[j],weight);
+        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
         /*if(isMC && refpt[j]>20){
           h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
           h_JEC_weights->Fill(refpt[j],weight);
@@ -383,6 +381,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(isMC && TMath::Abs(refparton_flavor[j])==21) isG=true;
         if(isQ) h_jet_Q->Fill(jtpt[j],weight);
         if(isG) h_jet_G->Fill(jtpt[j],weight);
+        h_jet->Fill(jtpt[j],weight);
    
 
         if(jtpt[j]<lowJetPtBound  || jtpt[j]>=upJetPtBound) continue;
@@ -608,13 +607,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           //Potential Problem 1
  
           if(v==1 || v==3 || v==5)genpt[j] = genpt[j]*1.03;
-          if(v==20 || v==22 || v==24)genpt[j] = genpt[j]*1.02;
           //if(v==14 || v==16 || v==18)genpt[j] = genpt[j]*1.01;
           if(v==2 || v==4 || v==6)genpt[j] = genpt[j]*0.97; 
-          if(v==21 || v==23 || v==25)genpt[j] = genpt[j]*0.98;
           //if(v==15 || v==17 || v==19)genpt[j] = genpt[j]*0.99;
           if(v==7 || v==8 || v==9)genpt[j] = getJERCorrected(mode,genpt[j],0.05);
-          if(v==10 || v==11 || v==12)genpt[j] = getJERCorrected(mode,genpt[j],0.02);
           if(v==34) genpt[j] = genpt[j]*1.025;
           if(v==35) genpt[j] = genpt[j]*0.975;
           if(v==36) genpt[j] = getJERCorrected("pPb5",genpt[j],0.05); 
@@ -622,7 +618,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           //(smears to pPb resolution, first ppref5 is a dummy argument)
           genpt[j] = getJERCorrected("ppref5",genpt[j],getGenMCSmearFactor("pPb5",genpt[j])); 
 
-          if(TMath::Abs(geneta[j]+boost) < jetEtaMin || TMath::Abs(geneta[j]+boost) > jetEtaMax || genpt[j]<lowJetPtBound || genpt[j]>=upJetPtBound) continue;
+          if(TMath::Abs(geneta[j]+boost) < jetEtaMin || TMath::Abs(geneta[j]+boost) > (doMidRapidity?0.25:jetEtaMax) || genpt[j]<lowJetPtBound || genpt[j]>=upJetPtBound) continue;
           
           //getting jet flavor (a bit convoluted because genMatchedID is not filled in forest correctly)
           bool isQ=false;
@@ -634,9 +630,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
              if(isQ || isG) break;
           }
             
-          h_jet_gen->Fill(genpt[j], weight);  
           if(isQ) h_jet_gen_Q->Fill(genpt[j],weight);
           if(isG) h_jet_gen_G->Fill(genpt[j],weight);
+          h_jet_gen->Fill(genpt[j], weight);  
        
           for(int t=0; t<nParticle; t++)
           { 
