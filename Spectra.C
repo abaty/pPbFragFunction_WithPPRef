@@ -106,9 +106,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   //for testing code in interactive mode only
   if(jobNum == -1)
   {
+    std::cout << "here" << std::endl;
     //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
-    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/MC/ppref5jet80_1_20160824_5.root",1);
-    if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5MB_0_20150227_0.root",0);
+    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet80_0_20160712_6.root",0);
+    if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5MB_0_20160718_53.root",0);
   }
   else{
     getInputFile(inputJets,isMC);
@@ -120,7 +121,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29),(strcmp(mode,"ppref5")==0 &&  isMC)?1:0);
   
-    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==34 || v==35 || v==36)) continue;
+    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==31 || v==34 || v==35 || v==36)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==2 && (v!=0)) continue;
 
@@ -189,8 +190,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     int lastMixEvt = 1;
     //mixing variable for pPb systems
     //not updated for pp reference
-    float mixHFProxy[100000] = {0};
-    if(typeUE==2 && (strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"Pbp5") == 0))
+    float mixHFProxy[300000] = {0};
+    if(typeUE==2 && (strcmp(mode,"pPb5") == 0 || strcmp(mode,"Pbp5") == 0))
     {
       for(int i = 0; i<trackMix->GetEntries();i++)
       {
@@ -205,10 +206,6 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           else if(strcmp(mode,"Pbp5") == 0)
           {
             if(trkEtaMix[t]<-2 && trkEtaMix[t]>-2.4 && trkPtMix[t]>0.5 && trkPtMix[t]<3 && highPurityMix[t]) mixHFProxy[i]++;
-          }
-          else if(strcmp(mode,"ppref5") == 0)
-          {
-            if(((trkEtaMix[t]<-2 && trkEtaMix[t]>-2.4) || (trkEtaMix[t]>2 && trkEtaMix[t]<2.4)) && trkPtMix[t]>0.5 && trkPtMix[t]<3 && highPurityMix[t]) mixHFProxy[i]++;
           }
         }
       }
@@ -231,9 +228,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       }*/
       //if(weight<1e-10) continue;//cutting out upper pthat samples just to keep gen similar
 
-      if(v==31 && nVtx>=7) continue;
-      if(v==32 && nVtx<5) continue;
-      if(v==33 && nVtx>=5 && nVtx<7) continue;
+      if(v==31 && nVtx>1) continue;
+      
+      /*if(v==32 && nVtx<5) continue;
+      if(v==33 && nVtx>=5 && nVtx<7) continue;*/
       
       //vz cut
       if(TMath::Abs(vz)>15) continue;
@@ -245,7 +243,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       {
         //calculating mutliplicity mixing variable for pPb
         float HFProxy = 0;
-        if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"ppref5") == 0  || strcmp(mode,"Pbp5") == 0)
+        if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"Pbp5") == 0)
         {
           track->GetEntry(i);
           for(int t = 0; t<nTrk; t++)
@@ -257,10 +255,6 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             else if(strcmp(mode,"Pbp5") == 0)
             {
               if(trkEta[t]<-2 && trkEta[t]>-2.4 && trkPt[t]>0.5 && trkPt[t]<3 && highPurity[t]) HFProxy++;
-            }
-            else if(strcmp(mode,"ppref5") == 0)
-            {
-              if(((trkEta[t]<-2 && trkEta[t]>-2.4) || (trkEta[t]>2 && trkEta[t]<2.4)) && trkPt[t]>0.5 && trkPt[t]<3 && highPurity[t]) HFProxy++;
             }
           }
         }
@@ -281,8 +275,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           lastMixEvt++;
           if(lastMixEvt>startMixEvt+maxIter) lastMixEvt = startMixEvt;
           evtMix->GetEntry(lastMixEvt);  
-          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
+          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
           else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
+          else if(strcmp(mode,"ppref5")==0) break;
         }
       }
 
@@ -332,15 +327,15 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           }
         }
  
-        /*
         //JEC thing here
+        /*
         float leadingHadronPt = 0;
         for(int t=0; t<nTrk; t++){
           if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
           if(trkPt[t]<leadingHadronPt) continue;
           if(trkPt[t] <= 1 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
           //if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
-          //else if(strcmp(mode,"ppref5")==0 && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
+          //else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr &&  (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
           if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3){
             leadingHadronPt = trkPt[t];
           }
@@ -353,7 +348,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(strcmp(mode,"pPb5")==0) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
         if(strcmp(mode,"Pbp5")==0) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);
         //end FF correction
-        */ 
+        */
 
         if(strcmp(mode,"ppref5")==0){
           //smearing to match pPb resolution
@@ -399,8 +394,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           {
             if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>200) continue;
             double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
-            if(r_min_temp < r_min) r_min = r_min_temp;
-            rmin_pt = jtpt[j2];
+            if(r_min_temp < r_min){ r_min = r_min_temp;
+            rmin_pt = jtpt[j2];}
           }
           r_min = rmin_pt;
    
@@ -495,7 +490,23 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         //UE subtraction w/ MB mixing
         if(typeUE==2)
         {        
-          getInputEntryMix(lastMixEvt);
+          bool noJet = false;
+          while(!noJet){
+            noJet = true;
+            getInputEntryMix(lastMixEvt);
+            //veto on jets in the MB event
+            for(int j2 = 0; j2<nrefMix; j2++)
+            {
+              if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) > 20) continue;
+              double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],jteta[j],jtphi[j]),0.5);
+              if(r_min_temp < 0.3) noJet=false;
+            }                     
+            if(!noJet){
+              lastMixEvt++;                                                     
+              if(lastMixEvt>startMixEvt+(trackMix->GetEntries())) lastMixEvt = startMixEvt;
+            }
+          }
+
           for(int t = 0; t < nTrkMix; t++)
           {
             if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
@@ -510,8 +521,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>200) continue;
               double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
-              if(r_min_temp < r_min) r_min = r_min_temp;
-              rmin_pt = jtptMix[j2];
+              if(r_min_temp < r_min){ r_min = r_min_temp;
+              rmin_pt = jtptMix[j2];}
             }                                                                          
             r_min = rmin_pt;
               
@@ -740,8 +751,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>200) continue;
               double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
-              if(r_min_temp < r_min) r_min = r_min_temp;
-              rmin_pt = jtpt[j2];
+              if(r_min_temp < r_min){ r_min = r_min_temp;
+              rmin_pt = jtpt[j2];}
             }
             r_min = rmin_pt;
    
@@ -814,8 +825,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               {
                 if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>200) continue;
                 double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
-                if(r_min_temp < r_min) r_min = r_min_temp;
-                rmin_pt = jtptMix[j2];
+                if(r_min_temp < r_min){ r_min = r_min_temp;
+                rmin_pt = jtptMix[j2];}
               }                                                                          
               r_min = rmin_pt;
               
