@@ -56,11 +56,6 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
     if((strcmp("pPb5",mode)==0 || strcmp("Pbp5",mode)==0) && strcmp(trigger,"jet80")==0) fileList = readInputFileList("pPb5Pbp5_jet80_data_files.txt");
     if((strcmp("pPb5",mode)==0 || strcmp("Pbp5",mode)==0) && strcmp(trigger,"jet40")==0) fileList = readInputFileList("pPb5Pbp5_jet40_data_files.txt");
     if((strcmp("pPb5",mode)==0 || strcmp("Pbp5",mode)==0) && strcmp(trigger,"MB")==0) fileList.push_back("/mnt/hadoop/cms/store/user/abaty/FF_forests/data/pPb_5_02TeV_pA2013/PA2013_HiForest_PromptReco_KrisztianMB_JSonPPb_forestv84.root");
-    if(strcmp("pp2",mode)==0 && strcmp(trigger,"jet80")==0) fileList.push_back("/mnt/hadoop/cms/store/user/abaty/FF_forests/data/pp_2_76TeV_pp2013/PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82.root");
-    if(strcmp("pp2",mode)==0 && strcmp(trigger,"jet40")==0) fileList.push_back("/mnt/hadoop/cms/store/user/abaty/FF_forests/data/pp_2_76TeV_pp2013/PP2013_HiForest_PromptReco_JSon_Jet40Jet60_ppTrack_forestv84.root");
-    if(strcmp("pp2",mode)==0 && strcmp(trigger,"MB")==0) fileList.push_back("/mnt/hadoop/cms/store/user/luck/pp_minbiasSkim_forest_53x_2013-08-15-0155/pp_minbiasSkim_forest_53x_2013-08-15-0155.root");
-    if(strcmp("pp7",mode)==0 && strcmp(trigger,"MB")==0) fileList.push_back("/mnt/hadoop/cms/store/user/velicanu/Run2011A/MinimumBias2/FOREST/12Oct2013-v1-merged/pp_7TeV_2011A_12Oct2013-v1.root");
-    else if(strcmp("pp7",mode)==0) fileList = readInputFileList("pp7Files.txt");
 
     if(strcmp("ppref5",mode)==0 && (strcmp(trigger,"MB")==0)) fileList = readInputFileList("pp_MinBias6.txt");
     if(strcmp("ppref5",mode)==0 && (strcmp(trigger,"jet40")==0 || strcmp(trigger,"jet60")==0)) fileList = readInputFileList("HighPtLowerJets.txt");
@@ -70,26 +65,6 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
 
   //pp7 MC reweighting
   int totalEntriesForWeighting[7] = {0};
-  if(strcmp(mode, "pp7")==0 && isMC)
-  {
-    for(int f=0; f<nFiles; f++)
-    { 
-      if(f%100 == 0) std::cout << "tabulating entries; file " << f << "/" << nFiles <<std::endl;
-      int isGoodFile = openInFileFast(fileList[f].data(),mode,isMC);
-      if( isGoodFile == 0)
-      { 
-        closeInFileFast(0);
-        continue;
-      }
-
-      for(int i = 0; i<7; i++)
-      {
-        if(fileList[f].find(Form("%dto%d",(int)pp7PthatBounds[i],(int)pp7PthatBounds[i+1])) != std::string::npos) totalEntriesForWeighting[i] += trackIn->GetEntries();
-      }
-      closeInFileFast();
-    }
-    for(int i = 0 ; i<7; i++) std::cout << pp7PthatBounds[i] << " has " << totalEntriesForWeighting[i] << " entries." <<std::endl;
-  }
 
 //start of skim here 
   int outFileNum = 0;
@@ -169,11 +144,6 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
 
       if(isMC)
       {
-        if(strcmp("pp2",mode)==0)
-        {
-          if(pthat > pp2PthatBounds[f+2]) continue;
-          weight = crossSection2[f]/(float)nEntries;
-        }
         if(strcmp("ppref5",mode)==0)
         {
           if(pthat > ppref5PthatBounds[f+2]) continue;
@@ -188,13 +158,6 @@ void makeSkim(const char * mode = "pp2", const char * trigger = "jet80",int isMC
         {
           if(pthat > pPb5PthatBounds[f+2]) continue; 
           weight = crossSection5[f]/(float)nEntries;
-        }
-        if(strcmp("pp7",mode)==0)
-        {
-          for(int k = 0; k<7; k++)
-          {
-            if(fileList[f].find(Form("%dto%d",(int)pp7PthatBounds[k],(int)pp7PthatBounds[k+1])) != std::string::npos) weight = crossSection7[k]/(float)totalEntriesForWeighting[k];
-          }    
         }
       }
       if((strcmp("pp7",mode)==0 && strcmp("MB",trigger)==0 && !isMC) || strcmp("ppref5",mode)==0) vz=zVtx[maxPtVtx];

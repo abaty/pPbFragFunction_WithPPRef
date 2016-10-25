@@ -166,9 +166,9 @@ void systematics(int UEtype=2, int alternativeUE = 0)
 
     for(int j = 1; j<pPbSys[i]->GetSize()-1; j++){
       //for data MC differences in tracking
-      quad(pPbSys[i],j,0.039);
-      quad(ppSys[i],j,0.039);
-      quad(ratSys[i],j,quad(0.039,0.039)); //(cancellation here?)
+      quad(pPbSys[i],j, ((pPbFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)? quad(0.039,0.039) : 0)); //(cancellation here?)
 
       //for pileup check
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_lowPU[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));

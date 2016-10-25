@@ -123,7 +123,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   
     if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==31 || v==34 || v==35 || v==36)) continue;
     if(typeUE!=0 && v==26) continue;
-    if(typeUE==2 && (v!=0)) continue;
+    //if(typeUE==2 && (v!=0 && v!=31)) continue;
 
     //reco
     h_jet = new TH1D("h_jet","",nJetBins,0,300); 
