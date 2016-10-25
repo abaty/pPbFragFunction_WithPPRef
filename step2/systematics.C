@@ -141,9 +141,10 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     pPbFF_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pPb5Pbp5TeV_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
     ppFF_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pp5TeV_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
     rat_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pPbPbp_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
-    pPbFF_RnonC[i]->Divide(pPbFF_GnonC[i]);
-    ppFF_RnonC[i]->Divide(ppFF_GnonC[i]);
-    rat_RnonC[i]->Divide(rat_GnonC[i]);
+    //make sure gen divided by reco is correct here (think so)
+    pPbFF_GnonC[i]->Divide(pPbFF_RnonC[i]);
+    ppFF_GnonC[i]->Divide(ppFF_RnonC[i]);
+    rat_GnonC[i]->Divide(rat_RnonC[i]);
 
  
     //clone results to get systematics binning
@@ -204,12 +205,21 @@ void systematics(int UEtype=2, int alternativeUE = 0)
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_ppJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
 
       //nonclosure in MC
-      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_RnonC[i]->GetBinContent(j)):0));
-      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_RnonC[i]->GetBinContent(j)) :0));
-      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_RnonC[i]->GetBinContent(j)):0));
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_GnonC[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_GnonC[i]->GetBinContent(j)) :0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_GnonC[i]->GetBinContent(j)):0));
     }
     if(i==0){ pPbSys[i]->Print("All"); ppSys[i]->Print("All"); ratSys[i]->Print("All");}
   }
+
+  TFile * output = TFile::Open(Form("SystematicsUE%d.root",UEtype),"recreate");
+  for(int i = 0; i<FF_Bins*2; i++){
+    pPbSys[i]->SetDirectory(output);
+    ppSys[i]->SetDirectory(output);
+    ratSys[i]->SetDirectory(output);
+  }
+  output->Write();
+  output->Close();
 
   inf->Close();
   inf_UE->Close();
