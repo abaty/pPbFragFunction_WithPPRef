@@ -11,560 +11,215 @@
 #include "TF1.h"
 #include "TMath.h"
 
-/*const int variations = 20;
-const char * variationTag[variations]= {"","_pp2JESUP4","_pp2JESDOWN4","_pp7JESUP4","_pp7JESDOWN4","_pPb5JESUP4","_pPb5JESDOWN4","_pp2JER10","_pp7JER10","_pPb5JER10","_pp2JER2","_pp7JER2","_pPb5JER2","_NoTrackCorr","_pp2JESUP1","_pp2JESDOWN1","_pp7JESUP1","_pp7JESDOWN1","_pPb5JESUP1","_pPb5JESDOWN1"};
-
 const int FF_Bins = 5;
-double FF_Bound[FF_Bins+1] = {60,80,100,120,140,200};*/
+double FF_Bound[FF_Bins+1] = {60,80,100,120,140,200};
 
-
-TH1D** getRatio(const char * mode = "pp2", int v=0, int UEtype1=3, int UEtype2=3)
-{
-  TH1D** ratioArray = new TH1D*[FF_Bins*2];
-
-  TFile * inf1 = TFile::Open(Form("FragmentationFunctions%sUE%d.root",variationTag[v],UEtype1),"read");
-  TFile * inf2 = TFile::Open(Form("FragmentationFunctionsUE%d.root",UEtype2),"read");
-  for(int i =0; i<FF_Bins*2; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    if(strcmp(mode,"pPb5")==0)
-    {
-      ratioArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      ratioArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      ratioArray[i]->SetName(Form("%s%s_Ratio%d%s",mode,variationTag[v],i,isXi.data()));
-      ratioArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pp2")==0)
-    {
-      ratioArray[i] = (TH1D*)inf1->Get(Form("pp2TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      ratioArray[i]->Divide((TH1D*)inf2->Get(Form("pp2TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      ratioArray[i]->SetName(Form("%s%s_Ratio%d%s",mode,variationTag[v],i,isXi.data()));
-      ratioArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pp7")==0)
-    {
-      ratioArray[i] = (TH1D*)inf1->Get(Form("pp7TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      ratioArray[i]->Divide((TH1D*)inf2->Get(Form("pp7TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      ratioArray[i]->SetName(Form("%s%s_Ratio%d%s",mode,variationTag[v],i,isXi.data()));
-      ratioArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"interp")==0)
-    {
-      ratioArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      ratioArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      ratioArray[i]->SetName(Form("%s%s_Ratio%d%s",mode,variationTag[v],i,isXi.data()));
-      ratioArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"FFratio")==0)
-    {
-      ratioArray[i] = (TH1D*)inf1->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      ratioArray[i]->Divide((TH1D*)inf2->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      ratioArray[i]->SetName(Form("%s%s_Ratio%d%s",mode,variationTag[v],i,isXi.data()));
-      ratioArray[i]->SetDirectory(0);
-    }
-  }  
-  inf1->Close();
-  inf2->Close();
-  return ratioArray;
+void quad(TH1D* h, int j, double percent){
+  h->SetBinContent(j,TMath::Power(h->GetBinContent(j)*h->GetBinContent(j)+percent*percent,0.5));
+  return;
 }
 
-TH1D** getpPbPbpDiff(const char * mode = "pPb5", int v=0, int UEtype=3)
-{
-  TH1D** diffArray = new TH1D*[FF_Bins*2];
-
-  TFile * inf1 = TFile::Open(Form("FragmentationFunctions%sUE%d.root",variationTag[v],UEtype),"read");
-  TFile * inf2 = TFile::Open(Form("FragmentationFunctionsUE%d.root",UEtype),"read");
-  for(int i =0; i<FF_Bins*2; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    if(strcmp(mode,"pPb5")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("Pbp5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->Scale(0.5);
-      diffArray[i]->SetName(Form("%s%s_pPbPbpDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"FFratio")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("Pbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->Scale(0.5);
-      diffArray[i]->SetName(Form("%s%s_pPbPbpDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"interp")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->Scale(0.5);
-      diffArray[i]->SetName(Form("%s%s_pPbPbpDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-  }  
-  inf1->Close();
-  inf2->Close();
-  return diffArray;
+double quad(double a, double b){
+  return TMath::Power(a*a+b*b,0.5);
 }
 
-TH1D** getMCDiff(const char * mode = "pPb5", int v=0,int UEtype=3)
-{
-  TH1D** diffArray = new TH1D*[FF_Bins*2];
-
-  TFile * inf1 = TFile::Open(Form("FragmentationFunctions%sUE%d.root",variationTag[v],UEtype),"read");
-  TFile * inf2 = TFile::Open(Form("FragmentationFunctionsUE%d.root",UEtype),"read");
-  for(int i =0; i<FF_Bins*2; i++)
-  {   
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    if(strcmp(mode,"pp2")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pp2TeV_reco_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("pp2TeV_gen_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pp2TeV_reco_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s%s_MCDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pp7")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pp7TeV_reco_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("pp7TeV_gen_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pp7TeV_reco_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s%s_MCDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pPb5")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("pPb5Pbp5TeV_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s%s_MCDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"interp")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_recoMC_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("pPb5Pbp5TeV_genMC_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_recoMC_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s%s_MCDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"FFratio")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPbPbp_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf1->Get(Form("pPbPbp_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPbPbp_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s%s_MCDiff%d%s",mode,variationTag[v],i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-  }  
-  inf1->Close();
-  inf2->Close();
-  return diffArray;
-}
-
-TH1D** getChargeCutDiff(const char * mode = "pPb5", int UEtype=3)
-{
-  TH1D** diffArray = new TH1D*[FF_Bins*2];
-
-  TFile * inf1 = TFile::Open(Form("FragmentationFunctions%sUE%d.root",variationTag[30],UEtype),"read");
-  TFile * inf2 = TFile::Open(Form("FragmentationFunctionsUE%d.root",UEtype),"read");
-  for(int i =0; i<FF_Bins*2; i++)
-  {   
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    if(strcmp(mode,"pp2")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pp2TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf2->Get(Form("pp2TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pp2TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s_ChargeCutDiff%d%s",mode,i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pp7")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pp7TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf2->Get(Form("pp7TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pp7TeV_NoReweight_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s_ChargeCutDiff%d%s",mode,i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"pPb5")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s_ChargeCutDiff%d%s",mode,i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"interp")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPb5Pbp5TeV_data_interp_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s_ChargeCutDiff%d%s",mode,i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-    if(strcmp(mode,"FFratio")==0)
-    {
-      diffArray[i] = (TH1D*)inf1->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
-      diffArray[i]->Add((TH1D*)inf2->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())),-1);
-      diffArray[i]->Divide((TH1D*)inf2->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())));
-      diffArray[i]->SetName(Form("%s_ChargeCutDiff%d%s",mode,i,isXi.data()));
-      diffArray[i]->SetDirectory(0);
-    }
-  }  
-  inf1->Close();
-  inf2->Close();
-  return diffArray;
-}
-
-void FFSystematics(const char * mode, int UEtype)
-{
-  //getting sources of error as ratios
-   TH1D** JESUP;
-   TH1D** JESDOWN;
-   TH1D** JER;
-   TH1D** pPbPbpDiff;
-   TH1D** MCDiff;
-   TH1D** ChargeCutDiff;
-   TH1D** UEDiff;
-   //estimating 5% tracking errors
-   double track = 0.039;
-
-  if(strcmp(mode,"pPb5")==0)
-  {
-    JESUP = getRatio(mode,5,UEtype,UEtype);
-    JESDOWN = getRatio(mode,6,UEtype,UEtype);
-    JER = getRatio(mode,9,UEtype,UEtype);
-    pPbPbpDiff = getpPbPbpDiff(mode,0,UEtype);
-    MCDiff = getMCDiff(mode,30,UEtype);
-    ChargeCutDiff = getChargeCutDiff(mode,UEtype);
-//    if(UEtype==0) UEDiff = getRatio(mode,26,UEtype);
-    if(UEtype==0) UEDiff = getRatio(mode,0,2,UEtype);
-  }
-  if(strcmp(mode,"pp2")==0)
-  {
-    JESUP = getRatio(mode,1,UEtype,UEtype);
-    JESDOWN = getRatio(mode,2,UEtype,UEtype);
-    JER = getRatio(mode,7,UEtype,UEtype);
-    MCDiff = getMCDiff(mode,30,UEtype); 
-    ChargeCutDiff = getChargeCutDiff(mode,UEtype);
-    //if(UEtype==0) UEDiff = getRatio(mode,26,UEtype);
-    if(UEtype==0) UEDiff = getRatio(mode,0,2,UEtype);
-  }
-  if(strcmp(mode,"pp7")==0)
-  {
-    JESUP = getRatio(mode,3,UEtype,UEtype);
-    JESDOWN = getRatio(mode,4,UEtype,UEtype);
-    JER = getRatio(mode,8,UEtype,UEtype);
-    MCDiff = getMCDiff(mode,30,UEtype);
-    ChargeCutDiff = getChargeCutDiff(mode,UEtype);
-    //if(UEtype==0) UEDiff = getRatio(mode,26,UEtype);
-    if(UEtype==0) UEDiff = getRatio(mode,0,2,UEtype); 
-  }
-
-  TFile * output;
-  if(strcmp("pPb5",mode)==0) output = new TFile(Form("SystematicsUE%d.root",UEtype),"recreate");
-  else output = new TFile(Form("SystematicsUE%d.root",UEtype),"update");
-
-  //doing asymmetric JES errors
-  TH1D* JESTotUP[FF_Bins*2];
-  TH1D* JESTotDOWN[FF_Bins*2];
-  TH1D* JERTot[FF_Bins*2];
-  for(int i = 0; i<FF_Bins*2; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    JESTotUP[i] = (TH1D*)JESUP[i]->Clone(Form("%s_JESTotUP%d%s",mode,i,isXi.data()));
-    JESTotDOWN[i] = (TH1D*)JESDOWN[i]->Clone(Form("%s_JESTotDOWN%d%s",mode,i,isXi.data()));
-    JERTot[i] = (TH1D*)JER[i]->Clone(Form("%s_JERTot%d%s",mode,i,isXi.data()));
-
-    for(int j = 0; j<JESTotUP[0]->GetSize(); j++)
-    {
-      if(JESTotUP[i]->GetBinContent(j)<JESDOWN[i]->GetBinContent(j)) JESTotUP[i]->SetBinContent(j,JESDOWN[i]->GetBinContent(j));
-      JESTotUP[i]->SetBinContent(j,JESTotUP[i]->GetBinContent(j)-1);
-      if(JESTotUP[i]->GetBinContent(j)<0.001) JESTotUP[i]->SetBinContent(j,0.001);
-
-      if(JESTotDOWN[i]->GetBinContent(j)>JESUP[i]->GetBinContent(j)) JESTotDOWN[i]->SetBinContent(j,JESUP[i]->GetBinContent(j));
-      JESTotDOWN[i]->SetBinContent(j,JESTotDOWN[i]->GetBinContent(j)-1);
-      if(JESTotDOWN[i]->GetBinContent(j)>-0.001) JESTotDOWN[i]->SetBinContent(j,-0.001);
-
-      if(JERTot[i]->GetBinContent(j)!=0)  JERTot[i]->SetBinContent(j,TMath::Abs(JERTot[i]->GetBinContent(j)-1));
-    }
-  }
-
-  //adding all sources together in quadrature
-  TH1D* TotUP[FF_Bins*2];
-  TH1D* TotDOWN[FF_Bins*2];
-  for(int i = 0; i<2*FF_Bins; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    TotUP[i] = (TH1D*)JESTotUP[i]->Clone(Form("%s_TotUP%d%s",mode,i,isXi.data())); 
-    TotDOWN[i] = (TH1D*)JESTotDOWN[i]->Clone(Form("%s_TotDOWN%d%s",mode,i,isXi.data()));
-  
-    for(int j = 0; j<TotUP[0]->GetSize(); j++)
-    {
-      //if empty bins
-      if(JER[i]->GetBinContent(j)==0 || JESTotUP[i]->GetBinContent(j)==-1 || JESTotDOWN[i]->GetBinContent(j)==-1)
-      {
-        TotUP[i]->SetBinContent(j,0);
-        TotDOWN[i]->SetBinContent(j,0);
-        TotUP[i]->SetBinError(j,0);
-        TotDOWN[i]->SetBinError(j,0);
-        JESTotUP[i]->SetBinContent(j,0);
-        JESTotDOWN[i]->SetBinContent(j,0);
-        JESTotUP[i]->SetBinError(j,0);
-        JESTotDOWN[i]->SetBinError(j,0);
-      }
-      else 
-      {
-        TotUP[i]->SetBinContent(j,TMath::Power(TotUP[i]->GetBinContent(j),2)+TMath::Power(JER[i]->GetBinContent(j)-1,2)+track*track);
-        TotDOWN[i]->SetBinContent(j,TMath::Power(TotDOWN[i]->GetBinContent(j),2)+TMath::Power(JER[i]->GetBinContent(j)-1,2)+track*track);
-        if(strcmp(mode,"pPb5")==0)
-        {
-          TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(pPbPbpDiff[i]->GetBinContent(j),2));
-          TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(pPbPbpDiff[i]->GetBinContent(j),2));
-        }
-        if(MCDiff[i]->GetBinContent(j)<0) TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(MCDiff[i]->GetBinContent(j),2));
-        else if(MCDiff[i]->GetBinContent(j)>0) TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(MCDiff[i]->GetBinContent(j),2));
-        if(ChargeCutDiff[i]->GetBinContent(j)>0) TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(ChargeCutDiff[i]->GetBinContent(j),2));
-        else if(ChargeCutDiff[i]->GetBinContent(j)<0) TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(ChargeCutDiff[i]->GetBinContent(j),2));
-
-        if(UEtype==0)
-        {        
-          TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+ TMath::Power(UEDiff[i]->GetBinContent(j)-1,2));
-          TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+ TMath::Power(UEDiff[i]->GetBinContent(j)-1,2));
-          UEDiff[i]->SetBinContent(j,TMath::Abs(UEDiff[i]->GetBinContent(j)-1));
-        }      
- 
-        TotUP[i]->SetBinContent(j,TMath::Power(TotUP[i]->GetBinContent(j),0.5));
-        TotDOWN[i]->SetBinContent(j,TMath::Power(TotDOWN[i]->GetBinContent(j),0.5));
-      }
-    } 
-    JESUP[i]->Write();
-    JESDOWN[i]->Write();
-    JER[i]->Write();
-    if(strcmp(mode,"pPb5")==0) pPbPbpDiff[i]->Write();
-    MCDiff[i]->Write();
-    ChargeCutDiff[i]->Write();
-    if(UEtype==0) UEDiff[i]->Write();
-    JESTotUP[i]->Write();
-    JESTotDOWN[i]->Write();
-    JERTot[i]->Write();
-    TotUP[i]->Write();
-    TotDOWN[i]->Write();
-  }
-  output->Close();
-}
-
-void Interpolation_and_Ratio_Systematics(const char * mode = "interp", int UEtype=3)
-{
-  //getting sources of error as ratios
-  TH1D** pp2JESUP;
-  TH1D** pp2JESDOWN;
-  TH1D** pp2JER; 
-  TH1D** pp7JESUP;
-  TH1D** pp7JESDOWN;
-  TH1D** pp7JER;
-  TH1D** pPb5JESUP;
-  TH1D** pPb5JESDOWN;
-  TH1D** pPb5JER;
-  TH1D** pPbPbpDiff;
-  TH1D** MCDiff;
-  TH1D** ChargeCutDiff;
-  TH1D** UEDiff;
-
-  //estimating 5% tracking errors
-  double track = 0.039;
-  double pdf_uncert = 0.005;
- 
-  if(strcmp(mode,"interp")==0) 
-  {
-    pp2JESUP = getRatio(mode,1,UEtype,UEtype);
-    pp2JESDOWN = getRatio(mode,2,UEtype,UEtype);
-    pp2JER = getRatio(mode,7,UEtype,UEtype);
-    pp7JESUP = getRatio(mode,3,UEtype,UEtype);
-    pp7JESDOWN = getRatio(mode,4,UEtype,UEtype);
-    pp7JER = getRatio(mode,8,UEtype,UEtype);
-    pPb5JESUP = getRatio(mode,5,UEtype,UEtype);
-    pPb5JESDOWN = getRatio(mode,6,UEtype,UEtype);
-    pPb5JER = getRatio(mode,9,UEtype,UEtype);
-    pPbPbpDiff = getpPbPbpDiff(mode,0,UEtype);
-    MCDiff = getMCDiff(mode,30,UEtype);
-    ChargeCutDiff = getChargeCutDiff(mode,UEtype);
-    //if(UEtype==0) UEDiff = getRatio(mode,26,UEtype);
-    if(UEtype==0) UEDiff = getRatio(mode,0,2,UEtype);
-  }
-  else if(strcmp(mode,"FFratio")==0) 
-  {
-    track = 0.05515432893; //3.9% times sqrt(2)
-    pp2JESUP = getRatio(mode,20,UEtype,UEtype);
-    pp2JESDOWN = getRatio(mode,21,UEtype,UEtype);
-    pp2JER = getRatio(mode,7,UEtype,UEtype);
-    pp7JESUP = getRatio(mode,22,UEtype,UEtype);
-    pp7JESDOWN = getRatio(mode,23,UEtype,UEtype);
-    pp7JER = getRatio(mode,8,UEtype,UEtype);
-    pPb5JESUP = getRatio(mode,24,UEtype,UEtype);
-    pPb5JESDOWN = getRatio(mode,25,UEtype,UEtype);
-    pPb5JER = getRatio(mode,9,UEtype,UEtype); 
-    pPbPbpDiff = getpPbPbpDiff(mode,0,UEtype);
-    MCDiff = getMCDiff(mode,30,UEtype);
-    ChargeCutDiff = getChargeCutDiff(mode,UEtype);
-    //if(UEtype==0) UEDiff = getRatio(mode,26,UEtype);
-    if(UEtype==0) UEDiff = getRatio(mode,0,2,UEtype);
-  }
-
-  TFile * output = new TFile(Form("SystematicsUE%d.root",UEtype),"update");
-
-  TH1D* pp2JESTotUP[FF_Bins*2];
-  TH1D* pp2JESTotDOWN[FF_Bins*2];
-  TH1D* pp7JESTotUP[FF_Bins*2];
-  TH1D* pp7JESTotDOWN[FF_Bins*2];
-  TH1D* pPb5JESTotUP[FF_Bins*2];
-  TH1D* pPb5JESTotDOWN[FF_Bins*2];
-
-  for(int i = 0; i<2*FF_Bins; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    pp2JESTotUP[i] = (TH1D*)pp2JESUP[i]->Clone(Form("%s_pp2JESTotUP%d%s",mode,i,isXi.data()));
-    pp2JESTotDOWN[i] = (TH1D*)pp2JESDOWN[i]->Clone(Form("%s_pp2JESTotDOWN%d%s",mode,i,isXi.data()));
-    pp7JESTotUP[i] = (TH1D*)pp7JESUP[i]->Clone(Form("%s_pp7JESTotUP%d%s",mode,i,isXi.data()));
-    pp7JESTotDOWN[i] = (TH1D*)pp7JESDOWN[i]->Clone(Form("%s_pp7JESTotDOWN%d%s",mode,i,isXi.data()));
-    pPb5JESTotUP[i] = (TH1D*)pPb5JESUP[i]->Clone(Form("%s_pPb5JESTotUP%d%s",mode,i,isXi.data()));
-    pPb5JESTotDOWN[i] = (TH1D*)pPb5JESDOWN[i]->Clone(Form("%s_pPb5JESTotDOWN%d%s",mode,i,isXi.data()));
-
-    for(int j = 0; j<pp2JESTotUP[0]->GetSize(); j++)
-    {
-      if(pp2JESTotUP[i]->GetBinContent(j)<pp2JESDOWN[i]->GetBinContent(j)) pp2JESTotUP[i]->SetBinContent(j,pp2JESDOWN[i]->GetBinContent(j));
-      pp2JESTotUP[i]->SetBinContent(j,pp2JESTotUP[i]->GetBinContent(j)-1);
-      if(pp2JESTotUP[i]->GetBinContent(j)<0.001) pp2JESTotUP[i]->SetBinContent(j,0.001);
-
-      if(pp2JESTotDOWN[i]->GetBinContent(j)>pp2JESUP[i]->GetBinContent(j)) pp2JESTotDOWN[i]->SetBinContent(j,pp2JESUP[i]->GetBinContent(j));
-      pp2JESTotDOWN[i]->SetBinContent(j,pp2JESTotDOWN[i]->GetBinContent(j)-1);
-      if(pp2JESTotDOWN[i]->GetBinContent(j)>-0.001) pp2JESTotDOWN[i]->SetBinContent(j,-0.001);
- 
-      if(pp7JESTotUP[i]->GetBinContent(j)<pp7JESDOWN[i]->GetBinContent(j)) pp7JESTotUP[i]->SetBinContent(j,pp7JESDOWN[i]->GetBinContent(j));
-      pp7JESTotUP[i]->SetBinContent(j,pp7JESTotUP[i]->GetBinContent(j)-1);
-      if(pp7JESTotUP[i]->GetBinContent(j)<0.001) pp7JESTotUP[i]->SetBinContent(j,0.001);
-
-      if(pp7JESTotDOWN[i]->GetBinContent(j)>pp7JESUP[i]->GetBinContent(j)) pp7JESTotDOWN[i]->SetBinContent(j,pp7JESUP[i]->GetBinContent(j));
-      pp7JESTotDOWN[i]->SetBinContent(j,pp7JESTotDOWN[i]->GetBinContent(j)-1);   
-      if(pp7JESTotDOWN[i]->GetBinContent(j)>-0.001) pp7JESTotDOWN[i]->SetBinContent(j,-0.001);
-
-      if(pPb5JESTotUP[i]->GetBinContent(j)<pPb5JESDOWN[i]->GetBinContent(j)) pPb5JESTotUP[i]->SetBinContent(j,pPb5JESDOWN[i]->GetBinContent(j));
-      pPb5JESTotUP[i]->SetBinContent(j,pPb5JESTotUP[i]->GetBinContent(j)-1);
-      if(pPb5JESTotUP[i]->GetBinContent(j)<0.001) pPb5JESTotUP[i]->SetBinContent(j,0.001);
-
-      if(pPb5JESTotDOWN[i]->GetBinContent(j)>pPb5JESUP[i]->GetBinContent(j)) pPb5JESTotDOWN[i]->SetBinContent(j,pPb5JESUP[i]->GetBinContent(j));
-      pPb5JESTotDOWN[i]->SetBinContent(j,pPb5JESTotDOWN[i]->GetBinContent(j)-1);
-      if(pPb5JESTotDOWN[i]->GetBinContent(j)>-0.001) pPb5JESTotDOWN[i]->SetBinContent(j,-0.001);
-    }
-  }
-
-  //adding all sources in quadrature
-  TH1D* TotUP[FF_Bins*2];
-  TH1D* TotDOWN[FF_Bins*2];
-  TH1D* JESTotUP[FF_Bins*2];
-  TH1D* JESTotDOWN[FF_Bins*2];
-  TH1D* JERTot[FF_Bins*2];
-
-  for(int i = 0; i<2*FF_Bins; i++)
-  {
-    std::string  isXi = "";
-    if(i>=FF_Bins) isXi = "_xi";
-    TotUP[i] = (TH1D*)pp2JESTotUP[i]->Clone(Form("%s_TotUP%d%s",mode,i,isXi.data())); 
-    TotDOWN[i] = (TH1D*)pp2JESTotDOWN[i]->Clone(Form("%s_TotDOWN%d%s",mode,i,isXi.data()));
-    JESTotUP[i] = (TH1D*)pp2JESTotUP[i]->Clone(Form("%s_JESTotUP%d%s",mode,i,isXi.data()));
-    JESTotDOWN[i] = (TH1D*)pp2JESTotDOWN[i]->Clone(Form("%s_JESTotDOWN%d%s",mode,i,isXi.data()));
-    JERTot[i] = (TH1D*)pp2JER[i]->Clone(Form("%s_JERTot%d%s",mode,i,isXi.data())); 
-  
-    
-    for(int j = 0; j<TotUP[0]->GetSize(); j++)
-    {
-      //if empty bins
-      if(pp2JER[i]->GetBinContent(j)==0 || pp2JESTotUP[i]->GetBinContent(j)==-1 || pp2JESTotDOWN[i]->GetBinContent(j)==-1 || pp7JER[i]->GetBinContent(j)==0 || pp7JESTotUP[i]->GetBinContent(j)==-1 || pp7JESTotDOWN[i]->GetBinContent(j)==-1 || pPb5JER[i]->GetBinContent(j)==0 || pPb5JESTotUP[i]->GetBinContent(j)==-1 || pPb5JESTotDOWN[i]->GetBinContent(j)==-1)
-      {
-        TotUP[i]->SetBinContent(j,0);
-        TotDOWN[i]->SetBinContent(j,0);
-        TotUP[i]->SetBinError(j,0);
-        TotDOWN[i]->SetBinError(j,0);
-        JESTotUP[i]->SetBinContent(j,0);
-        JESTotDOWN[i]->SetBinContent(j,0);
-        JESTotUP[i]->SetBinError(j,0);
-        JESTotDOWN[i]->SetBinError(j,0);
-        JERTot[i]->SetBinContent(j,0);
-        JERTot[i]->SetBinContent(j,0);
-        JERTot[i]->SetBinError(j,0);
-        JERTot[i]->SetBinError(j,0);
-      }
-      else 
-      {
-        JESTotUP[i]->SetBinContent(j,TMath::Power(TMath::Power(pp2JESTotUP[i]->GetBinContent(j),2)+TMath::Power(pp7JESTotUP[i]->GetBinContent(j),2)+TMath::Power(pPb5JESTotUP[i]->GetBinContent(j),2),0.5));
-        JESTotDOWN[i]->SetBinContent(j,TMath::Power(TMath::Power(pp2JESTotDOWN[i]->GetBinContent(j),2)+TMath::Power(pp7JESTotDOWN[i]->GetBinContent(j),2)+TMath::Power(pPb5JESTotDOWN[i]->GetBinContent(j),2),0.5));    
-        JERTot[i]->SetBinContent(j,TMath::Power(TMath::Power(pp2JER[i]->GetBinContent(j)-1,2)+TMath::Power(pp7JER[i]->GetBinContent(j)-1,2)+TMath::Power(pPb5JER[i]->GetBinContent(j)-1,2),0.5)); 
-
-        TotUP[i]->SetBinContent(j,TMath::Power(JESTotUP[i]->GetBinContent(j),2)+TMath::Power(JERTot[i]->GetBinContent(j),2)+track*track+pdf_uncert*pdf_uncert);     
-        TotDOWN[i]->SetBinContent(j,TMath::Power(JESTotDOWN[i]->GetBinContent(j),2)+TMath::Power(JERTot[i]->GetBinContent(j),2)+track*track+pdf_uncert*pdf_uncert);
-        TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(pPbPbpDiff[i]->GetBinContent(j),2));
-        TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(pPbPbpDiff[i]->GetBinContent(j),2));
-        if(MCDiff[i]->GetBinContent(j)<0) TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(MCDiff[i]->GetBinContent(j),2));
-        else if(MCDiff[i]->GetBinContent(j)>0) TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(MCDiff[i]->GetBinContent(j),2));
-        if(ChargeCutDiff[i]->GetBinContent(j)>0) TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+TMath::Power(ChargeCutDiff[i]->GetBinContent(j),2));
-        else if(ChargeCutDiff[i]->GetBinContent(j)<0) TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+TMath::Power(ChargeCutDiff[i]->GetBinContent(j),2));
-    
-        if(UEtype == 0)
-        {     
-          TotUP[i]->SetBinContent(j,TotUP[i]->GetBinContent(j)+ TMath::Power(UEDiff[i]->GetBinContent(j)-1,2));
-          TotDOWN[i]->SetBinContent(j,TotDOWN[i]->GetBinContent(j)+ TMath::Power(UEDiff[i]->GetBinContent(j)-1,2));
-          UEDiff[i]->SetBinContent(j,TMath::Abs(UEDiff[i]->GetBinContent(j)-1));
-        }
-
-        TotUP[i]->SetBinContent(j,TMath::Power(TotUP[i]->GetBinContent(j),0.5));
-        TotDOWN[i]->SetBinContent(j,TMath::Power(TotDOWN[i]->GetBinContent(j),0.5));
-      }
-    }
-    pp2JESUP[i]->Write();
-    pp2JESDOWN[i]->Write();
-    pp2JER[i]->Write(); 
-    pp7JESUP[i]->Write();
-    pp7JESDOWN[i]->Write();
-    pp7JER[i]->Write();
-    pPb5JESUP[i]->Write();
-    pPb5JESDOWN[i]->Write();
-    pPb5JER[i]->Write();
-    pPbPbpDiff[i]->Write(); 
-    MCDiff[i]->Write();
-    ChargeCutDiff[i]->Write();
-    if(UEtype==0) UEDiff[i]->Write();
-    pp2JESTotUP[i]->Write();
-    pp2JESTotDOWN[i]->Write(); 
-    pp7JESTotUP[i]->Write();
-    pp7JESTotDOWN[i]->Write();
-    pPb5JESTotUP[i]->Write();
-    pPb5JESTotDOWN[i]->Write();  
-    JESTotUP[i]->Write();
-    JESTotDOWN[i]->Write();
-    JERTot[i]->Write();
-    TotUP[i]->Write();
-    TotDOWN[i]->Write();
-  }
-  output->Close(); 
-}
-
-void systematics(int UEtype=3)
+void systematics(int UEtype=2, int alternativeUE = 0)
 {
   TH1::SetDefaultSumw2();
-  FFSystematics("pPb5",UEtype);
-  FFSystematics("pp2",UEtype);
-  FFSystematics("pp7",UEtype);
-  Interpolation_and_Ratio_Systematics("interp",UEtype);
-  Interpolation_and_Ratio_Systematics("FFratio",UEtype);
+  //histos needed for computation
+  TH1D* pPbSys[FF_Bins*2];
+  TH1D* ppSys[FF_Bins*2];
+  TH1D* ratSys[FF_Bins*2];
+
+  TH1D* pPbFF[FF_Bins*2];
+  TH1D* ppFF[FF_Bins*2];
+  TH1D* rat[FF_Bins*2];
+  
+  TH1D* pPbGoing[FF_Bins*2];
+  TH1D* PbpGoing[FF_Bins*2];
+  
+  TH1D* pPbFF_UE[FF_Bins*2];
+  TH1D* ppFF_UE[FF_Bins*2];
+  TH1D* rat_UE[FF_Bins*2];
+  
+  TH1D* pPbFF_lowPU[FF_Bins*2];
+  TH1D* ppFF_lowPU[FF_Bins*2];
+  TH1D* rat_lowPU[FF_Bins*2];
+  
+  TH1D* pPbFF_noChgCut[FF_Bins*2];
+  TH1D* ppFF_noChgCut[FF_Bins*2];
+  TH1D* rat_noChgCut[FF_Bins*2];
+
+  //JES
+  TH1D* ppFF_ppJESU[FF_Bins*2];
+  TH1D* rat_ppJESU[FF_Bins*2];
+  TH1D* ppFF_ppJESD[FF_Bins*2];
+  TH1D* rat_ppJESD[FF_Bins*2];
+  TH1D* pPbFF_pPbJESU[FF_Bins*2];
+  TH1D* rat_pPbJESU[FF_Bins*2];
+  TH1D* pPbFF_pPbJESD[FF_Bins*2];
+  TH1D* rat_pPbJESD[FF_Bins*2];
+
+  //JER
+  TH1D* ppFF_ppJER[FF_Bins*2];
+  TH1D* rat_ppJER[FF_Bins*2];
+  TH1D* pPbFF_pPbJER[FF_Bins*2];
+  TH1D* rat_pPbJER[FF_Bins*2];
+
+  //MC nonclsures
+  TH1D* ppFF_RnonC[FF_Bins*2];
+  TH1D* pPbFF_RnonC[FF_Bins*2];
+  TH1D* rat_RnonC[FF_Bins*2];
+  TH1D* ppFF_GnonC[FF_Bins*2];
+  TH1D* pPbFF_GnonC[FF_Bins*2];
+  TH1D* rat_GnonC[FF_Bins*2];
+
+  //files needed for computation
+  TFile * inf = TFile::Open(Form("FragmentationFunctionsUE%d.root",UEtype),"read");
+  TFile * inf_UE = TFile::Open(Form("FragmentationFunctionsUE%d.root",alternativeUE),"read");
+  TFile * inf_lowPU = TFile::Open(Form("FragmentationFunctions_lowPUUE%d.root",UEtype),"read");
+  TFile * inf_noChgCut = TFile::Open(Form("FragmentationFunctions_NoChargeCutUE%d.root",UEtype),"read");
+  TFile * inf_ppJESU = TFile::Open(Form("FragmentationFunctions_pprefJESUP2p5UE%d.root",UEtype),"read");
+  TFile * inf_ppJESD = TFile::Open(Form("FragmentationFunctions_pprefJESDOWN2p5UE%d.root",UEtype),"read");
+  TFile * inf_pPbJESU = TFile::Open(Form("FragmentationFunctions_pPb5JESUP3UE%d.root",UEtype),"read");
+  TFile * inf_pPbJESD = TFile::Open(Form("FragmentationFunctions_pPb5JESDOWN3UE%d.root",UEtype),"read");
+  TFile * inf_ppJER = TFile::Open(Form("FragmentationFunctions_ppref5JER5UE%d.root",UEtype),"read");
+  TFile * inf_pPbJER = TFile::Open(Form("FragmentationFunctions_pPb5JER5UE%d.root",UEtype),"read");
+  TFile * inf_nonC = TFile::Open(Form("FragmentationFunctionsUE%d.root",3),"read");
+ 
+  //loading everything in
+  for(int i =0; i<FF_Bins*2; i++)
+  {
+    std::cout << i << std::endl;   
+    std::string  isXi = "";
+    if(i>=FF_Bins) isXi = "_xi";
+
+    //get Result
+    pPbFF[i] = (TH1D*)inf->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF[i] = (TH1D*)inf->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat[i] = (TH1D*)inf->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+   
+    //beam reversal check
+    pPbGoing[i] = (TH1D*)inf->Get(Form("pPb5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    PbpGoing[i] = (TH1D*)inf->Get(Form("Pbp5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+  
+    //UE check
+    pPbFF_UE[i] = (TH1D*)inf_UE->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF_UE[i] = (TH1D*)inf_UE->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_UE[i] = (TH1D*)inf_UE->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+ 
+    //no PU check 
+    pPbFF_lowPU[i] = (TH1D*)inf_lowPU->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF_lowPU[i] = (TH1D*)inf_lowPU->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_lowPU[i] = (TH1D*)inf_lowPU->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    
+    //no charge Cut
+    pPbFF_noChgCut[i] = (TH1D*)inf_noChgCut->Get(Form("pPb5Pbp5TeV_fulldata_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF_noChgCut[i] = (TH1D*)inf_noChgCut->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_noChgCut[i] = (TH1D*)inf_noChgCut->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+
+    //JES   
+    ppFF_ppJESU[i] = (TH1D*)inf_ppJESU->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_ppJESU[i] = (TH1D*)inf_ppJESU->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    ppFF_ppJESD[i] = (TH1D*)inf_ppJESD->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_ppJESD[i] = (TH1D*)inf_ppJESD->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    pPbFF_pPbJESU[i] = (TH1D*)inf_pPbJESU->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_pPbJESU[i] = (TH1D*)inf_pPbJESU->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    pPbFF_pPbJESD[i] = (TH1D*)inf_pPbJESD->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_pPbJESD[i] = (TH1D*)inf_pPbJESD->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+
+    //JER
+    ppFF_ppJER[i] = (TH1D*)inf_ppJER->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_ppJER[i] = (TH1D*)inf_ppJER->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    pPbFF_pPbJER[i] = (TH1D*)inf_pPbJER->Get(Form("ppref5TeV_data_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_pPbJER[i] = (TH1D*)inf_pPbJER->Get(Form("pPbPbp_FF_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    
+    //MC nonclosure
+    pPbFF_RnonC[i] = (TH1D*)inf_nonC->Get(Form("pPb5Pbp5TeV_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF_RnonC[i] = (TH1D*)inf_nonC->Get(Form("pp5TeV_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_RnonC[i] = (TH1D*)inf_nonC->Get(Form("pPbPbp_FF_recoMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    pPbFF_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pPb5Pbp5TeV_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppFF_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pp5TeV_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    rat_GnonC[i] = (TH1D*)inf_nonC->Get(Form("pPbPbp_FF_genMC_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data())); 
+    pPbFF_RnonC[i]->Divide(pPbFF_GnonC[i]);
+    ppFF_RnonC[i]->Divide(ppFF_GnonC[i]);
+    rat_RnonC[i]->Divide(rat_GnonC[i]);
+
+ 
+    //clone results to get systematics binning
+    pPbSys[i] = (TH1D*)pPbFF[i]->Clone(Form("pPbSyst_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ppSys[i] = (TH1D*)ppFF[i]->Clone(Form("ppSyst_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    ratSys[i] = (TH1D*)rat[i]->Clone(Form("ratSyst_%d_%d%s",(int)FF_Bound[i%FF_Bins],(int)FF_Bound[i%FF_Bins+1],isXi.data()));
+    pPbSys[i]->Reset();
+    ppSys[i]->Reset();
+    ratSys[i]->Reset();
+    pPbSys[i]->SetDirectory(0);
+    ppSys[i]->SetDirectory(0);
+    ratSys[i]->SetDirectory(0);
+  }
+
+  //calculation
+  for(int i =0; i<FF_Bins*2; i++)
+  {  
+    std::string  isXi = "";
+    if(i>=FF_Bins) isXi = "_xi";
+
+    for(int j = 1; j<pPbSys[i]->GetSize()-1; j++){
+      //for data MC differences in tracking
+      quad(pPbSys[i],j,0.039);
+      quad(ppSys[i],j,0.039);
+      quad(ratSys[i],j,quad(0.039,0.039)); //(cancellation here?)
+
+      //for pileup check
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_lowPU[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_lowPU[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_lowPU[i]->GetBinContent(j)/rat[i]->GetBinContent(j))    :0));
+
+      //beam reversal (half the difference of directions), pPb propagates directly to ratio
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
+      quad(ratSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
+      
+      //Alternative UE check (difference between results)
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_UE[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_UE[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_UE[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+
+      //no jet charge cut (difference between results)
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_noChgCut[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_noChgCut[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_noChgCut[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+
+      //JES for FFs (max of the difference between up and down)
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(pPbFF_pPbJESU[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)),TMath::Abs(pPbFF_pPbJESD[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)))/pPbFF[i]->GetBinContent(j):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(ppFF_ppJESU[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)),TMath::Abs(ppFF_ppJESD[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)))/ppFF[i]->GetBinContent(j)  :0));
+      //same thing for ratios (cancellation here?)
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(rat_pPbJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_pPbJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j):0));
+      quad(ratSys[i],j, ((rat[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(rat_ppJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_ppJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j)  :0));
+     
+      //JER (difference from nominal) 
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_pPbJER[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_ppJER[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+      //JER ratio (adding both contributions difference from nominal) 
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_pPbJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_ppJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+
+      //nonclosure in MC
+      quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_RnonC[i]->GetBinContent(j)):0));
+      quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_RnonC[i]->GetBinContent(j)) :0));
+      quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_RnonC[i]->GetBinContent(j)):0));
+    }
+    if(i==0){ pPbSys[i]->Print("All"); ppSys[i]->Print("All"); ratSys[i]->Print("All");}
+  }
+
+  inf->Close();
+  inf_UE->Close();
+  inf_lowPU->Close();
+  inf_noChgCut->Close();
+  inf_ppJESU->Close(); 
+  inf_ppJESD->Close();
+  inf_pPbJESU->Close();
+  inf_pPbJESD->Close();
+  inf_ppJER->Close();
+  inf_pPbJER->Close();
+  inf_nonC->Close();
 }
