@@ -292,6 +292,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
       //if(pthat > 2*pthats[file2]) continue;
       if(file==1) boost = 0.4654094531;
       if(file==2) boost = -0.4654094531;
+      boost = -boost;//pPb MC has proton in + direction, pPb data has it in minus, and both are reversed for the 'Pbp definition'
       if(TMath::Abs(jteta[j]+boost)>1.5) continue;
       if(jtpt[j]>140 && jtpt[j]<200 && refpt[j]<=0 && rawpt[j]>30) std::cout << jtpt[j] << " " << refpt[j] << " " << chargedMax[j]/rawpt[j] << " " << chargedSum[j]/rawpt[j] << std::endl;
       if(rawpt[j]<30) continue;
@@ -326,7 +327,7 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
   }
   
   //fragmentation stuff
-  /*float leadingHadronPt = 0;
+  float leadingHadronPt = 0;
   if(doFragJEC){
   for(int t=0; t<nTrk; t++){
     if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
@@ -337,16 +338,16 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
     if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3){
       leadingHadronPt = trkPt[t];
     }
-  }*/
+  }
 
   //FF experiment:
-  /*
-  if(file==0 || file==4) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
+  
+  /*if(file==0 || file==4) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
   if(file==1) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
   if(file==2) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);
-  */  
+    */
   
-  /*if(doMC && refpt[j]>20){
+  if(doMC && refpt[j]>20){
     float weight = crossSection5[file2]/t->GetEntries()*MCTruth->getHFPbWeight(hiHF4);
     h_trackVsJEC[file]->Fill(leadingHadronPt,refpt[j],jtpt[j]/refpt[j]*weight);
     h_trackVsJEC_weights[file]->Fill(leadingHadronPt,refpt[j],weight);
@@ -364,8 +365,20 @@ void checkJESJER(bool doMoreBins = false, bool doFragJEC = true, bool doFineBins
       h_trackVsJEC_1z[file][2]->Fill(leadingHadronPt/refpt[j],jtpt[j]/refpt[j]*weight);
       h_trackVsJEC_weights_1z[file][2]->Fill(leadingHadronPt/refpt[j],weight);
     }
+    /*if(jtpt[j]<100 && jtpt[j]>=60){
+      h_trackVsJEC_1z[file][0]->Fill(leadingHadronPt/jtpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][0]->Fill(leadingHadronPt/jtpt[j],weight);
+    }
+    if(jtpt[j]<140 && jtpt[j]>=100){
+      h_trackVsJEC_1z[file][1]->Fill(leadingHadronPt/jtpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][1]->Fill(leadingHadronPt/jtpt[j],weight);
+    }
+    if(jtpt[j]<200 && jtpt[j]>=140){
+      h_trackVsJEC_1z[file][2]->Fill(leadingHadronPt/jtpt[j],jtpt[j]/refpt[j]*weight);
+      h_trackVsJEC_weights_1z[file][2]->Fill(leadingHadronPt/jtpt[j],weight);
+    }*/
   }
-  }*/
+  }
   //FF experiment:
   /*if(file==0 || file==4) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
   if(file==1) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);

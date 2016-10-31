@@ -93,7 +93,7 @@ void interpRatio_xi(int UEtype, int turnOffPoints = 0)
  
     if(i>9)
     {
-      hist[i]->SetMaximum(2.1);
+      hist[i]->SetMaximum(2.3);
       hist[i]->SetMinimum(0.4);
     }
 
@@ -262,24 +262,12 @@ void interpRatio_xi(int UEtype, int turnOffPoints = 0)
     double yMinimum = 0.70000001;
     if(UEtype == 0) yMaximum = 1.39999;
     if(UEtype == 3) yMaximum = 1.49999;
+    if(UEtype == 2) yMaximum = 1.49999;
     hist[i]->GetYaxis()->SetRangeUser(yMinimum,yMaximum);
 
   hist[i]->Draw();
   for(int j=1; j<hist[i]->GetSize()-1; j++)
   {
-    if(turnOffPoints && i==13 && j==21)
-    {
-      hist[i]->SetBinContent(j,0);
-      hist[i]->SetBinError(j,0);
-      continue;
-    }
-    if(turnOffPoints && i==8 && j==21)
-    {
-      hist[i]->SetBinContent(j,0);
-      hist[i]->SetBinError(j,0);
-      continue;
-    }
-    //if(j>20) continue;
     if(boxArray[i][j]->GetY2()>yMaximum) boxArray[i][j]->SetY2(yMaximum);
     if(boxArray[i][j]->GetY1()<yMinimum) boxArray[i][j]->SetY1(yMinimum);
     if(boxArray[i][j]->GetY2()!=0) boxArray[i][j]->Draw("l");
@@ -293,7 +281,6 @@ void interpRatio_xi(int UEtype, int turnOffPoints = 0)
       l->SetLineColor(1);
       l->Draw("same");
     }
-    //tlat->DrawLatex(0.6,0.8,Form("%d < p_{T}^{jet} < %d GeV/c",(int)FF_Bound[i-10],(int)FF_Bound[i+1-10]));
   }
 
   c1->Update();
@@ -302,7 +289,7 @@ void interpRatio_xi(int UEtype, int turnOffPoints = 0)
     c1->cd(i-9);
     tlat->DrawLatex(0.6,0.73,Form("%d < p_{T}^{jet} < %d GeV/c",(int)FF_Bound[i-10],(int)FF_Bound[i+1-10]));
   }
-  c1->SaveAs(Form("../../plots/prettyInterpRatioZoom_UE%d_xi.png",UEtype));
-  c1->SaveAs(Form("../../plots/prettyInterpRatioZoom_UE%d_xi.pdf",UEtype));
+  c1->SaveAs(Form("plots/prettyInterpRatioZoom_UE%d_xi.png",UEtype));
+  c1->SaveAs(Form("plots/prettyInterpRatioZoom_UE%d_xi.pdf",UEtype));
 }
 

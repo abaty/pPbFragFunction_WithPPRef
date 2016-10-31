@@ -30,6 +30,9 @@ void systematics(int UEtype=2, int alternativeUE = 0)
   TH1D* pPbSys[FF_Bins*2];
   TH1D* ppSys[FF_Bins*2];
   TH1D* ratSys[FF_Bins*2];
+  TH1D* pPbSys_part[FF_Bins*2][10];
+  TH1D* ppSys_part[FF_Bins*2][10];
+  TH1D* ratSys_part[FF_Bins*2][10];
 
   TH1D* pPbFF[FF_Bins*2];
   TH1D* ppFF[FF_Bins*2];
@@ -159,9 +162,17 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     ratSys[i]->SetDirectory(0);
   }
 
+  
+
   //calculation
   for(int i =0; i<FF_Bins*2; i++)
-  {  
+  { 
+    for(int j = 0; j<10; j++){
+      pPbSys_part[i][j] = (TH1D*) pPbSys[i]->Clone(Form("pPbSys_part%d_%d",i,j));
+      ppSys_part[i][j] = (TH1D*) ppSys[i]->Clone(Form("ppSys_part%d_%d",i,j));
+      ratSys_part[i][j] = (TH1D*) ratSys[i]->Clone(Form("ratSys_part%d_%d",i,j));
+    }
+  
     std::string  isXi = "";
     if(i>=FF_Bins) isXi = "_xi";
 
@@ -170,44 +181,69 @@ void systematics(int UEtype=2, int alternativeUE = 0)
       quad(pPbSys[i],j, ((pPbFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)? quad(0.039,0.039) : 0)); //(cancellation here?)
+         quad(pPbSys_part[i][0],j, ((pPbFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
+         quad(ppSys_part[i][0],j, ((ppFF[i]->GetBinContent(j)!=0)? 0.039 : 0));
+         quad(ratSys_part[i][0],j,((rat[i]->GetBinContent(j)!=0)? quad(0.039,0.039) : 0)); //(cancellation here?)
 
       //for pileup check
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_lowPU[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_lowPU[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_lowPU[i]->GetBinContent(j)/rat[i]->GetBinContent(j))    :0));
+         quad(pPbSys_part[i][1],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_lowPU[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+         quad(ppSys_part[i][1],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_lowPU[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+         quad(ratSys_part[i][1],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_lowPU[i]->GetBinContent(j)/rat[i]->GetBinContent(j))    :0));
 
       //beam reversal (half the difference of directions), pPb propagates directly to ratio
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
       quad(ratSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
+         quad(pPbSys_part[i][2],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
+         quad(ratSys_part[i][2],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs((PbpGoing[i]->GetBinContent(j)-pPbGoing[i]->GetBinContent(j))/(2*pPbFF[i]->GetBinContent(j))):0));
       
       //Alternative UE check (difference between results)
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_UE[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_UE[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_UE[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+         quad(pPbSys_part[i][3],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_UE[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+         quad(ppSys_part[i][3],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_UE[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+         quad(ratSys_part[i][3],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_UE[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
 
       //no jet charge cut (difference between results)
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_noChgCut[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_noChgCut[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_noChgCut[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+         quad(pPbSys_part[i][4],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_noChgCut[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+         quad(ppSys_part[i][4],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_noChgCut[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+         quad(ratSys_part[i][4],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_noChgCut[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
 
       //JES for FFs (max of the difference between up and down)
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(pPbFF_pPbJESU[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)),TMath::Abs(pPbFF_pPbJESD[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)))/pPbFF[i]->GetBinContent(j):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(ppFF_ppJESU[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)),TMath::Abs(ppFF_ppJESD[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)))/ppFF[i]->GetBinContent(j)  :0));
+         quad(pPbSys_part[i][5],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(pPbFF_pPbJESU[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)),TMath::Abs(pPbFF_pPbJESD[i]->GetBinContent(j)-pPbFF[i]->GetBinContent(j)))/pPbFF[i]->GetBinContent(j):0));
+         quad(ppSys_part[i][5],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(ppFF_ppJESU[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)),TMath::Abs(ppFF_ppJESD[i]->GetBinContent(j)-ppFF[i]->GetBinContent(j)))/ppFF[i]->GetBinContent(j)  :0));
       //same thing for ratios (cancellation here?)
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(rat_pPbJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_pPbJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j):0));
       quad(ratSys[i],j, ((rat[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(rat_ppJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_ppJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j)  :0));
+         quad(ratSys_part[i][5],j,((rat[i]->GetBinContent(j)!=0)?  TMath::Max(TMath::Abs(rat_pPbJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_pPbJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j):0));
+         quad(ratSys_part[i][5],j, ((rat[i]->GetBinContent(j)!=0) ?  TMath::Max(TMath::Abs(rat_ppJESU[i]->GetBinContent(j)-rat[i]->GetBinContent(j)),TMath::Abs(rat_ppJESD[i]->GetBinContent(j)-rat[i]->GetBinContent(j)))/rat[i]->GetBinContent(j)  :0));
      
       //JER (difference from nominal) 
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_pPbJER[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_ppJER[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
+         quad(pPbSys_part[i][6],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_pPbJER[i]->GetBinContent(j)/pPbFF[i]->GetBinContent(j)):0));
+         quad(ppSys_part[i][6],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_ppJER[i]->GetBinContent(j)/ppFF[i]->GetBinContent(j))  :0));
       //JER ratio (adding both contributions difference from nominal) 
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_pPbJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_ppJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+         quad(ratSys_part[i][6],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_pPbJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
+         quad(ratSys_part[i][6],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_ppJER[i]->GetBinContent(j)/rat[i]->GetBinContent(j)):0));
 
       //nonclosure in MC
       quad(pPbSys[i],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_GnonC[i]->GetBinContent(j)):0));
       quad(ppSys[i],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_GnonC[i]->GetBinContent(j)) :0));
       quad(ratSys[i],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_GnonC[i]->GetBinContent(j)):0));
+         quad(pPbSys_part[i][7],j,((pPbFF[i]->GetBinContent(j)!=0)?  TMath::Abs(1-pPbFF_GnonC[i]->GetBinContent(j)):0));
+         quad(ppSys_part[i][7],j, ((ppFF[i]->GetBinContent(j)!=0) ?  TMath::Abs(1-ppFF_GnonC[i]->GetBinContent(j)) :0));
+         quad(ratSys_part[i][7],j,((rat[i]->GetBinContent(j)!=0)  ?  TMath::Abs(1-rat_GnonC[i]->GetBinContent(j)):0));
     }
     if(i==0){ pPbSys[i]->Print("All"); ppSys[i]->Print("All"); ratSys[i]->Print("All");}
   }
@@ -217,6 +253,13 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     pPbSys[i]->SetDirectory(output);
     ppSys[i]->SetDirectory(output);
     ratSys[i]->SetDirectory(output);
+    for(int j = 0; j<10; j++){
+      if(j>7) continue;
+      pPbSys_part[i][j]->SetDirectory(output);
+      ppSys_part[i][j]->SetDirectory(output);
+      if(j==2) continue;
+      ratSys_part[i][j]->SetDirectory(output);
+    }
   }
   output->Write();
   output->Close();

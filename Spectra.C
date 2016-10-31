@@ -107,9 +107,12 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   if(jobNum == -1)
   {
     std::cout << "here" << std::endl;
-    //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
-    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet80_0_20160712_6.root",0);
-    if(typeUE==2) getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5MB_0_20160718_53.root",0);
+    getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5jet80_0_20150227_0.root",0);
+    //getInputFile("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5jet80_0_20160712_6.root",0);
+    if(typeUE==2){ 
+      getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/pPb5/data/pPb5MB_0_20150411_205.root",0);
+      //getInputFileMix("/mnt/hadoop/cms/store/user/abaty/FF_forests/skims/ppref5/data/ppref5MB_0_20160718_53.root",0);
+    }
   }
   else{
     getInputFile(inputJets,isMC);
@@ -183,6 +186,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     double boost = 0;
     if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0) boost = pPbRapidity;
     else if(strcmp(mode,"Pbp5") == 0) boost = -pPbRapidity;
+    if(isMC) boost = -boost;//pPb MC has proton in + direction, pPb data has it in minus, and both are reversed for the 'Pbp definition'
     std::cout << mode << " mode is specified; using a boost of: " << boost << std::endl;
   
     //variables for mixing
@@ -190,7 +194,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     int lastMixEvt = 1;
     //mixing variable for pPb systems
     //not updated for pp reference
-    float mixHFProxy[300000] = {0};
+    /*float mixHFProxyP[300000] = {0};
+    float mixHFProxyM[300000] = {0};
     if(typeUE==2 && (strcmp(mode,"pPb5") == 0 || strcmp(mode,"Pbp5") == 0))
     {
       for(int i = 0; i<trackMix->GetEntries();i++)
@@ -209,10 +214,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           }
         }
       }
-    }
+    }*/
 
     //if(strcmp(mode, "Pbp5")==0) startMixEvt = 6743253;
-    if(typeUE==2) lastMixEvt = trackMix->GetEntries();
+    if(typeUE==2) lastMixEvt = evtMix->GetEntries();
   
     int nEntry = track->GetEntries();
     //nEntry = 10;
@@ -242,7 +247,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       if(typeUE==2)
       {
         //calculating mutliplicity mixing variable for pPb
-        float HFProxy = 0;
+        /*float HFProxy = 0;
         if(strcmp(mode,"pPb5") == 0 || strcmp(mode,"pp5") == 0 || strcmp(mode,"Pbp5") == 0)
         {
           track->GetEntry(i);
@@ -257,7 +262,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               if(trkEta[t]<-2 && trkEta[t]>-2.4 && trkPt[t]>0.5 && trkPt[t]<3 && highPurity[t]) HFProxy++;
             }
           }
-        }
+        }*/
         
         int loopIter=0;
         int maxIter = trackMix->GetEntries(); 
@@ -275,8 +280,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           lastMixEvt++;
           if(lastMixEvt>startMixEvt+maxIter) lastMixEvt = startMixEvt;
           evtMix->GetEntry(lastMixEvt);  
-          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0) && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
-          else if(strcmp(mode,"Pbp5")==0 && (HFProxy<18 ? HFProxy==mixHFProxy[lastMixEvt] : mixHFProxy[lastMixEvt]>=18)) break;
+          if((strcmp(mode,"pPb5")==0 || strcmp(mode,"pp5")==0) && (TMath::Abs(hiHFplusEta4-hiHFplusEta4Mix)<2 || (hiHFplusEta4>20 && hiHFplusEta4Mix>18)) && (TMath::Abs(hiHFminusEta4-hiHFminusEta4Mix)<2 || (hiHFminusEta4>13 && hiHFminusEta4Mix>11))) break;//require the both HFs to be 'close' to each other, but open up the matching space for very high HF values
+          else if(strcmp(mode,"Pbp5")==0 && (TMath::Abs(hiHFplusEta4-hiHFplusEta4Mix)<2 || (hiHFplusEta4>13 && hiHFplusEta4Mix>11)) && (TMath::Abs(hiHFminusEta4-hiHFminusEta4Mix)<2 || (hiHFminusEta4>20 && hiHFminusEta4Mix>18))) break;//same thing with sides swapped
           else if(strcmp(mode,"ppref5")==0) break;
         }
       }
@@ -291,8 +296,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         totalJetsHist->Fill(1,weight);
         if(rawpt[j]<30) continue;
         totalJetsRawPtCut->Fill(1,weight);
-        //if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
-        if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        //if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
         totalJetsEtaCutHist->Fill(1,weight);
@@ -346,9 +351,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         }
         if(strcmp(mode,"ppref5")==0) jtpt[j] = getFragJECFactor("ppref5",leadingHadronPt,jtpt[j]);
         if(strcmp(mode,"pPb5")==0) jtpt[j] = getFragJECFactor("pPb5",leadingHadronPt,jtpt[j]);
-        if(strcmp(mode,"Pbp5")==0) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);
+        if(strcmp(mode,"Pbp5")==0) jtpt[j] = getFragJECFactor("Pbp5",leadingHadronPt,jtpt[j]);*/
         //end FF correction
-        */
+        
 
         if(strcmp(mode,"ppref5")==0){
           //smearing to match pPb resolution
@@ -531,7 +536,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPtMix[t], sType), 1, trkPtMix[t], trkPhiMix[t], trkEtaMix[t], r_min, sType);     
-              else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min,jtpt[j]);     
+              else trkCorr = trkCorrObj->getTrkCorr(trkPtMix[t],trkEtaMix[t],trkPhiMix[t],1,r_min,60);//just use lowest jet pt in table (60 GeV, should make no difference)     
  
               if(v==13) trkCorr=1;
               if(std::isfinite(trkCorr))
