@@ -5,7 +5,7 @@ then
 fi
 
 now="spectra_$(date +"%Y_%m_%d__%H_%M_%S")"
-njobs=$((2*($(wc -l < fileLists/masterList.txt))))
+njobs=$((3*($(wc -l < fileLists/masterList.txt))))
 
 mkdir $now
 cp fake*.root $now

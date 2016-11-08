@@ -126,6 +126,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   
     if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==31 || v==34 || v==35 || v==36)) continue;
     if(typeUE!=0 && v==26) continue;
+    if(typeUE==1 && v!=0) continue;
     //if(typeUE==2 && (v!=0 && v!=31)) continue;
 
     //reco
@@ -300,6 +301,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         //if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
+        if(typeUE==1 && (TMath::Abs(jteta[j]+boost))<0.3) continue;
         totalJetsEtaCutHist->Fill(1,weight);
   
       //JEC and its corrections applied
@@ -635,6 +637,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           genpt[j] = getJERCorrected("ppref5",genpt[j],getGenMCSmearFactor("pPb5",genpt[j])); 
 
           if(TMath::Abs(geneta[j]+boost) < jetEtaMin || TMath::Abs(geneta[j]+boost) > (doMidRapidity?0.25:jetEtaMax) || genpt[j]<lowJetPtBound || genpt[j]>=upJetPtBound) continue;
+          if(typeUE==1 && (TMath::Abs(geneta[j]+boost))<0.3) continue;
           
           //getting jet flavor (a bit convoluted because genMatchedID is not filled in forest correctly)
           bool isQ=false;

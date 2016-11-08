@@ -4,6 +4,7 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 #include "TColor.h"
+#include "TAxis.h"
 #include "TPad.h"
 #include "TAttMarker.h"
 #include "TAttLine.h"
@@ -256,11 +257,159 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     for(int j = 0; j<10; j++){
       if(j>7) continue;
       pPbSys_part[i][j]->SetDirectory(output);
-      ppSys_part[i][j]->SetDirectory(output);
-      if(j==2) continue;
       ratSys_part[i][j]->SetDirectory(output);
+      if(j==2) continue;
+      ppSys_part[i][j]->SetDirectory(output);
     }
   }
+
+  
+
+  TCanvas * c1;
+  TLegend * leg = new TLegend(0.3,0.4,0.7,0.9);
+  c1 = new TCanvas("c1","c1",1200,800);
+  float upper[5] = {80,100,120,140,200};
+  for(int i = 0; i<FF_Bins*2; i++){
+    c1->Clear();
+    leg->Clear();
+    leg->SetBorderSize(0);
+    pPbSys[i]->Draw("c");
+    if(i<5){
+      pPbSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
+      pPbSys[i]->GetXaxis()->SetTitle("p_{T}");
+      c1->SetLogx();
+    }else{
+      pPbSys[i]->GetXaxis()->SetRangeUser(0,5);
+      pPbSys[i]->GetXaxis()->SetTitle("#xi");
+      c1->SetLogx(0);
+    }
+    pPbSys[i]->GetYaxis()->SetRangeUser(0,1);
+    pPbSys[i]->GetYaxis()->SetTitle("Uncertainty (%)");
+    pPbSys_part[i][0]->SetLineColor(kRed); 
+    pPbSys_part[i][0]->Draw("c same"); 
+    pPbSys_part[i][1]->SetLineColor(kBlue); 
+    pPbSys_part[i][1]->Draw("c same"); 
+    pPbSys_part[i][2]->SetLineColor(kGreen); 
+    pPbSys_part[i][2]->Draw("c same"); 
+    pPbSys_part[i][3]->SetLineColor(kOrange); 
+    pPbSys_part[i][3]->Draw("c same"); 
+    pPbSys_part[i][4]->SetLineColor(kYellow); 
+    pPbSys_part[i][4]->Draw("c same"); 
+    pPbSys_part[i][5]->SetLineColor(kGray); 
+    pPbSys_part[i][5]->Draw("c same"); 
+    pPbSys_part[i][6]->SetLineColor(kCyan); 
+    pPbSys_part[i][6]->Draw("c same"); 
+    pPbSys_part[i][7]->SetLineColor(kMagenta); 
+    pPbSys_part[i][7]->Draw("c same"); 
+    leg->AddEntry((TObject*)0,"pPb FF", "");
+    leg->AddEntry(pPbSys[i],"Total Uncert.", "l");
+    leg->AddEntry(pPbSys_part[i][0],"Tracking data vs. MC", "l");
+    leg->AddEntry(pPbSys_part[i][1],"Tracking pileup", "l");
+    leg->AddEntry(pPbSys_part[i][2],"Beam reversal (pPb/Pbp)", "l");
+    leg->AddEntry(pPbSys_part[i][3],"UE subtraction", "l");
+    leg->AddEntry(pPbSys_part[i][4],"Jet charge cut", "l");
+    leg->AddEntry(pPbSys_part[i][5],"JES", "l");
+    leg->AddEntry(pPbSys_part[i][6],"JER", "l");
+    leg->AddEntry(pPbSys_part[i][7],"data/MC nonclosure", "l");
+    leg->Draw("same");
+    c1->SaveAs(Form("sysPlots/pPbsys_%d.png",i));
+    c1->SaveAs(Form("sysPlots/pPbsys_%d.pdf",i));
+    c1->SaveAs(Form("sysPlots/pPbsys_%d.C",i));
+
+    c1->Clear();
+    leg->Clear();
+    leg->SetBorderSize(0);
+    ppSys[i]->Draw("c");
+    if(i<5){
+      ppSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
+      ppSys[i]->GetXaxis()->SetTitle("p_{T}");
+      c1->SetLogx();
+    }else{
+      ppSys[i]->GetXaxis()->SetRangeUser(0,5);
+      ppSys[i]->GetXaxis()->SetTitle("#xi");
+      c1->SetLogx(0);
+    }
+    ppSys[i]->GetYaxis()->SetRangeUser(0,1);
+    ppSys[i]->GetYaxis()->SetTitle("Uncertainty (%)");
+    ppSys_part[i][0]->SetLineColor(kRed); 
+    ppSys_part[i][0]->Draw("c same"); 
+    ppSys_part[i][1]->SetLineColor(kBlue); 
+    ppSys_part[i][1]->Draw("c same"); 
+    //ppSys_part[i][2]->SetLineColor(kGreen); 
+    //ppSys_part[i][2]->Draw("c same"); 
+    ppSys_part[i][3]->SetLineColor(kOrange); 
+    ppSys_part[i][3]->Draw("c same"); 
+    ppSys_part[i][4]->SetLineColor(kYellow); 
+    ppSys_part[i][4]->Draw("c same"); 
+    ppSys_part[i][5]->SetLineColor(kGray); 
+    ppSys_part[i][5]->Draw("c same"); 
+    ppSys_part[i][6]->SetLineColor(kCyan); 
+    ppSys_part[i][6]->Draw("c same"); 
+    ppSys_part[i][7]->SetLineColor(kMagenta); 
+    ppSys_part[i][7]->Draw("c same"); 
+    leg->AddEntry((TObject*)0,"pp FF", "");
+    leg->AddEntry(ppSys[i],"Total Uncert.", "l");
+    leg->AddEntry(ppSys_part[i][0],"Tracking data vs. MC", "l");
+    leg->AddEntry(ppSys_part[i][1],"Tracking pileup", "l");
+    leg->AddEntry(ppSys_part[i][3],"UE subtraction", "l");
+    leg->AddEntry(ppSys_part[i][4],"Jet charge cut", "l");
+    leg->AddEntry(ppSys_part[i][5],"JES", "l");
+    leg->AddEntry(ppSys_part[i][6],"JER", "l");
+    leg->AddEntry(ppSys_part[i][7],"data/MC nonclosure", "l");
+    leg->Draw("same");
+    c1->SaveAs(Form("sysPlots/ppsys_%d.png",i));
+    c1->SaveAs(Form("sysPlots/ppsys_%d.pdf",i));
+    c1->SaveAs(Form("sysPlots/ppsys_%d.C",i));
+    
+    c1->Clear();
+    leg->Clear();
+    leg->SetBorderSize(0);
+    ratSys[i]->Draw("c");
+    if(i<5){
+      ratSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
+      ratSys[i]->GetXaxis()->SetTitle("p_{T}");
+      c1->SetLogx();
+    }else{
+      ratSys[i]->GetXaxis()->SetRangeUser(0,5);
+      ratSys[i]->GetXaxis()->SetTitle("#xi");
+      c1->SetLogx(0);
+    }
+    ratSys[i]->GetYaxis()->SetRangeUser(0,1);
+    ratSys[i]->GetYaxis()->SetTitle("Uncertainty (%)");
+    ratSys_part[i][0]->SetLineColor(kRed); 
+    ratSys_part[i][0]->Draw("c same"); 
+    ratSys_part[i][1]->SetLineColor(kBlue); 
+    ratSys_part[i][1]->Draw("c same"); 
+    ratSys_part[i][2]->SetLineColor(kGreen); 
+    ratSys_part[i][2]->Draw("c same"); 
+    ratSys_part[i][3]->SetLineColor(kOrange); 
+    ratSys_part[i][3]->Draw("c same"); 
+    ratSys_part[i][4]->SetLineColor(kYellow); 
+    ratSys_part[i][4]->Draw("c same"); 
+    ratSys_part[i][5]->SetLineColor(kGray); 
+    ratSys_part[i][5]->Draw("c same"); 
+    ratSys_part[i][6]->SetLineColor(kCyan); 
+    ratSys_part[i][6]->Draw("c same"); 
+    ratSys_part[i][7]->SetLineColor(kMagenta); 
+    ratSys_part[i][7]->Draw("c same"); 
+    leg->AddEntry((TObject*)0,"FF Ratio", "");
+    leg->AddEntry(ratSys[i],"Total Uncert.", "l");
+    leg->AddEntry(ratSys_part[i][0],"Tracking data vs. MC", "l");
+    leg->AddEntry(ratSys_part[i][1],"Tracking pileup", "l");
+    leg->AddEntry(ratSys_part[i][2],"Beam reversal (pPb/Pbp)", "l");
+    leg->AddEntry(ratSys_part[i][3],"UE subtraction", "l");
+    leg->AddEntry(ratSys_part[i][4],"Jet charge cut", "l");
+    leg->AddEntry(ratSys_part[i][5],"JES", "l");
+    leg->AddEntry(ratSys_part[i][6],"JER", "l");
+    leg->AddEntry(ratSys_part[i][7],"data/MC nonclosure", "l");
+    leg->Draw("same");
+    c1->SaveAs(Form("sysPlots/ratsys_%d.png",i));
+    c1->SaveAs(Form("sysPlots/ratsys_%d.pdf",i));
+    c1->SaveAs(Form("sysPlots/ratsys_%d.C",i));
+ 
+  }
+  delete c1;
+
   output->Write();
   output->Close();
 
