@@ -73,8 +73,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   //JEC initialization
   TString Jtmode;
   if(strcmp(mode,"ppref5")==0) Jtmode = "pp5";
-  if((strcmp(mode,"pPb5")==0) || (strcmp(mode,"pp5")==0)) Jtmode = "pPb5";
-  if(strcmp(mode,"Pbp5")==0) Jtmode = "Pbp5";
+  if(((strcmp(mode,"pPb5")==0) || (strcmp(mode,"pp5")==0)) && isMC==0) Jtmode = "Pbp5";
+  if(strcmp(mode,"Pbp5")==0 && isMC==0) Jtmode = "pPb5";
+  if(((strcmp(mode,"pPb5")==0) || (strcmp(mode,"pp5")==0)) && isMC==1) Jtmode = "pPb5";
+  if(strcmp(mode,"Pbp5")==0 && isMC==1) Jtmode = "Pbp5";
   L2ResidualJES * L2JES = new L2ResidualJES(3,3,Jtmode);
   L2ResidualJER * L2JER = new L2ResidualJER(Jtmode);
   L3ResidualJES * L3JES = new L3ResidualJES(Jtmode);
