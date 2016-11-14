@@ -20,11 +20,9 @@
 #include "getJEC_SystError.h"
 #include "getTrkCorr.h"
 
-//TODO
-//Potential Problem 1:
-//do I need to correct gen stuff?
 
 const double pPbRapidity = 0.4654094531;
+//const double pPbRapidity = 0;
 const int nJetBins = 120;
 const int ntrackBins=23;
 const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200};
@@ -126,7 +124,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   {
     setJetPtRange(mode,trigger,(int)(v==29),(strcmp(mode,"ppref5")==0 &&  isMC)?1:0);
   
-    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==31 || v==34 || v==35 || v==36)) continue;
+    if((strcmp(mode,"pPb5")==0 || strcmp(mode,"Pbp5")==0 || strcmp(mode,"pp5")==0 || strcmp(mode,"ppref5")==0) && !(v==0 || v==1 || v==2 || v==5 || v==6 || v==9 || v==13 || v==26 || v==30 || v==31 || v==34 || v==35 || v==36 || v==37 || v==38)) continue;
     if(typeUE!=0 && v==26) continue;
     if(typeUE==1 && v!=0) continue;
     //if(typeUE==2 && (v!=0 && v!=31)) continue;
@@ -299,8 +297,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         totalJetsHist->Fill(1,weight);
         if(rawpt[j]<30) continue;
         totalJetsRawPtCut->Fill(1,weight);
-        if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
-        //if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        //if((chargedSum[j]/rawpt[j]>0.95 || chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
+        if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
         if(typeUE==1 && (TMath::Abs(jteta[j]+boost))<0.3) continue;
@@ -317,10 +315,12 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             jtpt[j] = L2JER->getSmearedPt(jtpt[j], jteta[j]);
           } 
           //if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-          if(v==1 || v==3 || v==5)jtpt[j] = jtpt[j]*1.03;
+          if(v==1) jtpt[j] = jtpt[j]*1.015;
+          if(v==3 || v==5) jtpt[j] = jtpt[j]*1.025;
           //if(v==20 || v==22 || v==24)jtpt[j] = jtpt[j]+getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
           //if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],false);
-          if(v==2 || v==4 || v==6)jtpt[j] = jtpt[j]*0.97;
+          if(v==2) jtpt[j] = jtpt[j]*0.985;
+          if(v==4 || v==6)jtpt[j] = jtpt[j]*0.975;
           //if(v==21 || v==23 || v==25)jtpt[j] = jtpt[j]-getJEC_SystError(mode,rawpt[j],jtpt[j],jteta[j],true);
           if(v==7 || v==8 || v==9)jtpt[j] = getJERCorrected(mode,jtpt[j],0.05);
         }
@@ -364,7 +364,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           jtpt[j] = getJERCorrected("ppref5",jtpt[j],getPPDataSmearFactor(jtpt[j])); 
 
           if(v==34) jtpt[j] = jtpt[j]*1.025;
+          if(v==37) jtpt[j] = jtpt[j]*1.015;
           if(v==35) jtpt[j] = jtpt[j]*0.975;
+          if(v==38) jtpt[j] = jtpt[j]*0.985;
           if(v==36) jtpt[j] = getJERCorrected("pPb5",jtpt[j],0.05); 
         }
         //checking fake jet contribution
@@ -625,14 +627,18 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         {  
 
           //Potential Problem 1
- 
-          if(v==1 || v==3 || v==5)genpt[j] = genpt[j]*1.03;
+
+          if(v==1) genpt[j] = genpt[j]*1.015; 
+          if(v==3 || v==5)genpt[j] = genpt[j]*1.025;
           //if(v==14 || v==16 || v==18)genpt[j] = genpt[j]*1.01;
-          if(v==2 || v==4 || v==6)genpt[j] = genpt[j]*0.97; 
+          if(v==2) genpt[j] = genpt[j]*0.985; 
+          if(v==4 || v==6)genpt[j] = genpt[j]*0.975; 
           //if(v==15 || v==17 || v==19)genpt[j] = genpt[j]*0.99;
           if(v==7 || v==8 || v==9)genpt[j] = getJERCorrected(mode,genpt[j],0.05);
           if(v==34) genpt[j] = genpt[j]*1.025;
+          if(v==37) genpt[j] = genpt[j]*1.015;
           if(v==35) genpt[j] = genpt[j]*0.975;
+          if(v==38) genpt[j] = genpt[j]*0.985;
           if(v==36) genpt[j] = getJERCorrected("pPb5",genpt[j],0.05); 
           //smearing gen to match reco resolution (for ratio comparisons to be fair)
           //(smears to pPb resolution, first ppref5 is a dummy argument)
