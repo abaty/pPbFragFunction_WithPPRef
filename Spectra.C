@@ -24,8 +24,8 @@
 const double pPbRapidity = 0.4654094531;
 //const double pPbRapidity = 0;
 const int nJetBins = 120;
-const int ntrackBins=23;
-const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200};
+const int ntrackBins=24;
+const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200,300};
 
 
 //calculates dr^2 to avoid the slow TMath() Sqrt function

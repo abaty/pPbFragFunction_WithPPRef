@@ -35,8 +35,8 @@ TH1D * jet_pPb;
 
 //trk pt bins
 
-const int trkBins=22;
-const double yAxis[trkBins+1] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200};
+const int trkBins=23;
+const double yAxis[trkBins+1] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200, 300};
 
 //main execution starts here
 void makeFF(int v, int UEtype=3)
