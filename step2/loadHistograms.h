@@ -3,7 +3,7 @@
 #include "TH1D.h"
 #include <iostream>
 
-const char* filePath = "../mergedHists/Nov09_systChecks/";
+const char* filePath = "../mergedHists/Nov15_noL2res/";
 const int variations = 39;
 const char * variationTag[variations]= {"","_pPb5JESUP1p5","_pPb5JESDOWN1p5","_pp7JESUP3","_pp7JESDOWN3","_pPb5JESUP3","_pPb5JESDOWN3","_pp2JER5","_pp7JER5","_pPb5JER5","_pp2JER2","_pp7JER2","_pPb5JER2","_NoTrackCorr","_pp2JESUP1","_pp2JESDOWN1","_pp7JESUP1","_pp7JESDOWN1","_pPb5JESUP1","_pPb5JESDOWN1","_pp2JESUP2","_pp2JESDOWN2","_pp7JESUP2","_pp7JESDOWN2","_pPb5JESUP2","_pPb5JESDOWN2","_60DegreeCone","_ChargePlus","_ChargeMinus","_XtScaled","_NoChargeCut","_lowPU","_highPU","_midPU","_pprefJESUP2p5","_pprefJESDOWN2p5","_ppref5JER5","_pprefJESUP1p5","_pprefJESDOWN1p5"};
 

@@ -12,14 +12,14 @@ void compareOldandNew()
   for(int i = 0 ; i<5; i++){
   const char * histName = "pPbPbp_FF";
   TFile * fold = TFile::Open("FragmentationFunctionsUE2_nominal.root","read");
-  TFile * fnew = TFile::Open("FragmentationFunctions_pPb5JESUP3UE2.root","read");
+  TFile * fnew = TFile::Open("FragmentationFunctionsUE2.root","read");
   TH1D * num = (TH1D*)fnew->Get(Form("%s_%d_%d",histName,centBounds[i],centBounds[i+1]));
   TH1D * den = (TH1D*)fold->Get(Form("%s_%d_%d",histName,centBounds[i],centBounds[i+1]));
   //den->Add(num);
   num->Divide(den);
   //num->Scale(2);
-  num->GetYaxis()->SetTitle("(pPb JEC Up 2.5%%)/(Nominal)");
-  num->GetYaxis()->SetRangeUser(0.5,1.5);
+  num->GetYaxis()->SetTitle("(no L2 residual)/(Nominal)");
+  num->GetYaxis()->SetRangeUser(0.7,1.3);
   num->GetXaxis()->SetTitle("p_{T}");
   num->GetXaxis()->SetRangeUser(0.5,200);
   num->Print("All");
@@ -28,8 +28,8 @@ void compareOldandNew()
   lat.DrawLatex(1,1.2,Form("%d < p_{T}^{jet} < %d",centBounds[i],centBounds[i+1]));
 
   c1->SetLogx();
-  c1->SaveAs(Form("diffPlots/pPbJECUP2p5_%d_%d.png",centBounds[i],centBounds[i+1]));
-  c1->SaveAs(Form("diffPlots/pPbJECUP2p5_%d_%d.pdf",centBounds[i],centBounds[i+1]));
+  c1->SaveAs(Form("diffPlots/noL2Residual_%d_%d.png",centBounds[i],centBounds[i+1]));
+  c1->SaveAs(Form("diffPlots/noL2Residual_%d_%d.pdf",centBounds[i],centBounds[i+1]));
   fnew->Close();
   fold->Close();
   }  

@@ -52,6 +52,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
   }
 
   bool doMidRapidity = false;
+  double coneSize = 0.3;
+
+  std::string trkSkimVars;
+  trkSkimVars=   "trkPt:trkEta:trkPhi:jtpt:jteta:jtphi:rawpt:chargedSum:corr:weight";
+  TNtuple * highZskim  = new TNtuple("highZskim","",trkSkimVars.data()); 
 
   TH1::SetDefaultSumw2();
   TH2::SetDefaultSumw2(); 
@@ -182,6 +187,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_trackVsJEC_weights = new TH2D("h_trackVsJEC_weights","",ntrackBins-1,axis,trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
     h_JEC = new TProfile("h_JEC","",trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
     h_JEC_weights = new TProfile("h_JEC_weights","",trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
+    TProfile * h_L2ResidualCorr = new TProfile("h_L2ResidualCorr","",160,50,210);
+    TProfile * h_L2ResidualCorr_eta = new TProfile("h_L2ResidualCorr_eta","",40,-2,2);
   
     //boosting
     double boost = 0;
@@ -301,14 +308,16 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if((chargedSum[j]/rawpt[j]<0.05) && v!=30) continue;
         totalJetsChargeSumCut->Fill(1,weight);
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
-        if(typeUE==1 && (TMath::Abs(jteta[j]+boost))<0.3) continue;
+        if(typeUE==1 && (TMath::Abs(jteta[j]+boost))<coneSize) continue;
         totalJetsEtaCutHist->Fill(1,weight);
   
       //JEC and its corrections applied
+        float appliedL2Corr = 0;
         if(!(strcmp(mode,"ppref5")==0)){
           jtpt[j] = MCTruth->getJEC_1st(rawpt[j],jtpt[j],jteta[j]); 
           jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
           if(!isMC){
+            appliedL2Corr = L2JES->getCorrectedPt(jtpt[j], jteta[j])/jtpt[j]-1;
             jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
             jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);// this is 1 right now
           }else{
@@ -327,6 +336,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         else{
           jtpt[j] = MCTruth->getResidualCorr(jtpt[j],jteta[j]);
           if(!isMC){
+            appliedL2Corr = L2JES->getCorrectedPt(jtpt[j], jteta[j])/jtpt[j]-1;
             jtpt[j] = L2JES->getCorrectedPt(jtpt[j], jteta[j]);
             jtpt[j] = L3JES->getCorrectedPt(jtpt[j]);
           }else{
@@ -340,12 +350,12 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         /*
         float leadingHadronPt = 0;
         for(int t=0; t<nTrk; t++){
-          if((TMath::Abs(trkEta[t]-jteta[j])>0.3) || (TMath::Abs(trkPhi[t]-jtphi[j])>0.3)) continue;
+          if((TMath::Abs(trkEta[t]-jteta[j])>coneSize) || (TMath::Abs(trkPhi[t]-jtphi[j])>coneSize)) continue;
           if(trkPt[t]<leadingHadronPt) continue;
           if(trkPt[t] <= 1 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
           //if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
           //else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr &&  (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
-          if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3){
+          if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize){
             leadingHadronPt = trkPt[t];
           }
         }
@@ -391,6 +401,8 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
    
 
         if(jtpt[j]<lowJetPtBound  || jtpt[j]>=upJetPtBound) continue;
+        if(v==0) h_L2ResidualCorr->Fill(jtpt[j],appliedL2Corr);
+        if(v==0) h_L2ResidualCorr_eta->Fill(jteta[j],appliedL2Corr);
 
         for(int t=0; t<nTrk; t++)
         {
@@ -411,7 +423,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           r_min = rmin_pt;
    
           //Filling track spectrum in jet cone
-          if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+          if(getdR2(jteta[j]+boost,jtphi[j],trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
           {
             double trkCorr = 1;
             //std::cout << "before track" ;
@@ -427,6 +439,10 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               if(TMath::Abs(trkEta[t])>1.9)totalRecoTRecoJ_Tracking_largeEta->Fill(trkPt[t],weight*trkCorr);
               if(TMath::Abs(trkEta[t])<1.9)totalRecoTRecoJ_Tracking_lowEta->Fill(trkPt[t],weight*trkCorr);
               if(trkPt[t]>10)totalRecoTRecoJ_Tracking_largePt->Fill(trkEta[t],weight*trkCorr);
+              if(v==0 && typeUE==2 &&((jtpt[j]<140 && trkPt[t]>40 && (jtpt[j]-trkPt[t])<40) || trkPt[t]>140)){
+                float skimEntry[] = {trkPt[t],trkEta[t],trkPhi[t],jtpt[j],jteta[j],jtphi[j],rawpt[j],chargedSum[j],(float)trkCorr,weight};
+                highZskim->Fill(skimEntry);
+              }
 
               h_track->Fill(jtpt[j],trkPt[t],trkCorr*weight);
               h_track_xi->Fill(jtpt[j],getXi(jtpt[j],jteta[j]+boost,jtphi[j],trkPt[t],trkEta[t]+boost,trkPhi[t]),trkCorr*weight);
@@ -448,7 +464,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           double rotationDirection = 2*(int)rand->Integer(2)-1;
           if(v==26) rotationDirection = rotationDirection*2.0/3.0;
   
-          if(typeUE==0 && getdR2(jteta[j]+boost,jtphi[j]+rotationDirection*TMath::PiOver2(),trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+          if(typeUE==0 && getdR2(jteta[j]+boost,jtphi[j]+rotationDirection*TMath::PiOver2(),trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
           {
             double trkCorr = 1;
             if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
@@ -473,7 +489,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           }
   
           //Eta Reflected UE subtraction
-          if(typeUE==1 && getdR2(-1*(jteta[j]+boost),jtphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+          if(typeUE==1 && getdR2(-1*(jteta[j]+boost),jtphi[j],trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
           {
             double trkCorr = 1;
             if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
@@ -510,7 +526,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             {
               if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) > 20) continue;
               double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],jteta[j],jtphi[j]),0.5);
-              if(r_min_temp < 0.3) noJet=false;
+              if(r_min_temp < coneSize) noJet=false;
             }                     
             if(!noJet){
               lastMixEvt++;                                                     
@@ -538,7 +554,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             r_min = rmin_pt;
               
             //Filling track spectrum in jet cone
-            if(getdR2(jteta[j]+boost,jtphi[j],trkEtaMix[t]+boost,trkPhiMix[t]) < 0.3*0.3)
+            if(getdR2(jteta[j]+boost,jtphi[j],trkEtaMix[t]+boost,trkPhiMix[t]) < coneSize*coneSize)
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPtMix[t], sType), 1, trkPtMix[t], trkPhiMix[t], trkEtaMix[t], r_min, sType);     
@@ -571,7 +587,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           { 
             if(pPt[t] <= 0.5 || pPt[t] > 200 || TMath::Abs(pEta[t])>2.4 ) continue;
             //Filling track spectrum in jet cone
-            if(getdR2(jteta[j]+boost,jtphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+            if(getdR2(jteta[j]+boost,jtphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
             {
               totalGenTRecoJ_Tracking->Fill(pPt[t],weight);
               totalGenTRecoJ_Tracking_eta->Fill(pEta[t],weight);
@@ -586,14 +602,14 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               double rotationDirection = 2*(int)rand->Integer(2)-1;
               if(v==26) rotationDirection = rotationDirection*2.0/3.0;
 
-              if(typeUE==0 && getdR2(jteta[j]+boost,jtphi[j]+rotationDirection*TMath::PiOver2(),pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+              if(typeUE==0 && getdR2(jteta[j]+boost,jtphi[j]+rotationDirection*TMath::PiOver2(),pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
               {
                 h_trackUE_rJgT->Fill(jtpt[j],pPt[t],weight);  
                 h_trackUE_xi_rJgT->Fill(jtpt[j],getXi(jtpt[j],jteta[j]+boost,jtphi[j]+rotationDirection*TMath::PiOver2(),pPt[t],pEta[t]+boost,pPhi[t]),weight);
               }
   
               //Eta Reflected UE subtraction
-              if(typeUE==1 && getdR2(-1*(jteta[j]+boost),jtphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+              if(typeUE==1 && getdR2(-1*(jteta[j]+boost),jtphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
               {
                 h_trackUE_rJgT->Fill(jtpt[j],pPt[t],weight); 
                 h_trackUE_xi_rJgT->Fill(jtpt[j],getXi(jtpt[j],-1*(jteta[j]+boost),jtphi[j],pPt[t],pEta[t]+boost,pPhi[t]),weight);
@@ -609,7 +625,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               if(pPtMix[t] <= 0.5 || pPtMix[t] > 200 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
             
               //Filling track spectrum in jet cone
-              if(getdR2(jteta[j]+boost,jtphi[j],pEtaMix[t]+boost,pPhiMix[t]) < 0.3*0.3)
+              if(getdR2(jteta[j]+boost,jtphi[j],pEtaMix[t]+boost,pPhiMix[t]) < coneSize*coneSize)
               {
                 h_trackUE_rJgT->Fill(jtpt[j],pPtMix[t],weight);
                 h_trackUE_xi_rJgT->Fill(jtpt[j],getXi(jtpt[j],jteta[j]+boost,jtphi[j],pPtMix[t],pEtaMix[t]+boost,pPhiMix[t]),weight);
@@ -645,7 +661,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           genpt[j] = getJERCorrected("ppref5",genpt[j],getGenMCSmearFactor("pPb5",genpt[j])); 
 
           if(TMath::Abs(geneta[j]+boost) < jetEtaMin || TMath::Abs(geneta[j]+boost) > (doMidRapidity?0.25:jetEtaMax) || genpt[j]<lowJetPtBound || genpt[j]>=upJetPtBound) continue;
-          if(typeUE==1 && (TMath::Abs(geneta[j]+boost))<0.3) continue;
+          if(typeUE==1 && (TMath::Abs(geneta[j]+boost))<coneSize) continue;
           
           //getting jet flavor (a bit convoluted because genMatchedID is not filled in forest correctly)
           bool isQ=false;
@@ -666,7 +682,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             if(pPt[t] <= 0.5 || pPt[t] > 200 || TMath::Abs(pEta[t])>2.4 ) continue;
   
             //Filling track spectrum in jet cone
-            if(getdR2(geneta[j]+boost,genphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+            if(getdR2(geneta[j]+boost,genphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
             {
               totalGenTGenJ_Tracking->Fill(pPt[t],weight);
               h_track_gen->Fill(genpt[j],pPt[t],weight);
@@ -689,7 +705,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rotationDirection = 2*(int)rand->Integer(2)-1; 
             if(v==26) rotationDirection = rotationDirection*2.0/3.0;
 
-            if(typeUE==0 && getdR2(geneta[j]+boost,genphi[j]+rotationDirection*TMath::PiOver2(),pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+            if(typeUE==0 && getdR2(geneta[j]+boost,genphi[j]+rotationDirection*TMath::PiOver2(),pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
             {
               h_trackUE_gen->Fill(genpt[j],pPt[t],weight);  
               h_trackUE_xi_gen->Fill(genpt[j],getXi(genpt[j],geneta[j]+boost,genphi[j]+rotationDirection*TMath::PiOver2(),pPt[t],pEta[t]+boost,pPhi[t]),weight);
@@ -707,7 +723,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             }
   
             //Eta Reflected UE subtraction
-            if(typeUE==1 && getdR2(-1*(geneta[j]+boost),genphi[j],pEta[t]+boost,pPhi[t]) < 0.3*0.3)
+            if(typeUE==1 && getdR2(-1*(geneta[j]+boost),genphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
             {
               h_trackUE_gen->Fill(genpt[j],pPt[t],weight); 
               h_trackUE_xi_gen->Fill(genpt[j],getXi(genpt[j],-1*(geneta[j]+boost),genphi[j],pPt[t],pEta[t]+boost,pPhi[t]),weight);
@@ -734,7 +750,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               if(pPtMix[t] <= 0.5 || pPtMix[t] > 200 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
               
               //Filling track spectrum in jet cone
-              if(getdR2(geneta[j]+boost,genphi[j],pEtaMix[t]+boost,pPhiMix[t]) < 0.3*0.3)
+              if(getdR2(geneta[j]+boost,genphi[j],pEtaMix[t]+boost,pPhiMix[t]) < coneSize*coneSize)
               {
                 h_trackUE_gen->Fill(genpt[j],pPtMix[t],weight);
                 h_trackUE_xi_gen->Fill(genpt[j],getXi(genpt[j],geneta[j]+boost,genphi[j],pPtMix[t],pEtaMix[t]+boost,pPhiMix[t]),weight);
@@ -773,7 +789,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             r_min = rmin_pt;
    
             //Filling track spectrum in jet cone
-            if(getdR2(geneta[j]+boost,genphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+            if(getdR2(geneta[j]+boost,genphi[j],trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
@@ -793,7 +809,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rotationDirection = 2*(int)rand->Integer(2)-1;
             if(v==26) rotationDirection = rotationDirection*2.0/3.0;
 
-            if(typeUE==0 && getdR2(geneta[j]+boost,genphi[j]+rotationDirection*TMath::PiOver2(),trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+            if(typeUE==0 && getdR2(geneta[j]+boost,genphi[j]+rotationDirection*TMath::PiOver2(),trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
@@ -808,7 +824,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             }
   
             //Eta Reflected UE subtraction
-            if(typeUE==1 && getdR2(-1*(geneta[j]+boost),genphi[j],trkEta[t]+boost,trkPhi[t]) < 0.3*0.3)
+            if(typeUE==1 && getdR2(-1*(geneta[j]+boost),genphi[j],trkEta[t]+boost,trkPhi[t]) < coneSize*coneSize)
             {
               double trkCorr = 1;
               if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPt[t], sType), 1, trkPt[t], trkPhi[t], trkEta[t], r_min, sType);     
@@ -847,7 +863,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               r_min = rmin_pt;
               
               //Filling track spectrum in jet cone
-              if(getdR2(geneta[j]+boost,genphi[j],trkEtaMix[t]+boost,trkPhiMix[t]) < 0.3*0.3)
+              if(getdR2(geneta[j]+boost,genphi[j],trkEtaMix[t]+boost,trkPhiMix[t]) < coneSize*coneSize)
               {
                 double trkCorr = 1;
                 if(!(strcmp(mode,"ppref5")==0)) trkCorr = factorizedPtCorr(getPtBin(trkPtMix[t], sType), 1, trkPtMix[t], trkPhiMix[t], trkEtaMix[t], r_min, sType);     
@@ -908,6 +924,15 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_JEC_weights->SetDirectory(0);  
     h_trackVsJEC->SetDirectory(0);  
     h_trackVsJEC_weights->SetDirectory(0);  
+
+    if(typeUE==2 && v==0){
+      //highZskim->SetDirectory(0);
+      //highZskim->Write();
+      h_L2ResidualCorr->SetDirectory(0);
+      h_L2ResidualCorr->Write(); 
+      h_L2ResidualCorr_eta->SetDirectory(0);
+      h_L2ResidualCorr_eta->Write(); 
+    }
 
     h_jet->Write(Form("%s_reco_jet%s",mode,variationTag[v]));
     h_track->Write(Form("%s_reco_track%s",mode,variationTag[v]));
