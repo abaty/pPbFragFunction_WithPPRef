@@ -20,6 +20,8 @@
 #include "getJEC_SystError.h"
 #include "getTrkCorr.h"
 
+//CAREFUL WITH TRACKING CORRECTIONS >200 GeV?
+
 
 const double pPbRapidity = 0.4654094531;
 //const double pPbRapidity = 0;
@@ -384,7 +386,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
 
         //adding 10 GeV buffer here to the lowest bin
         totalJetsPtCutHist->Fill(1,weight);    
-        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==200)?220:upJetPtBound)) continue;      
+        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==400)?420:upJetPtBound)) continue;      
         /*if(isMC && refpt[j]>20){
           h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
           h_JEC_weights->Fill(refpt[j],weight);
@@ -407,7 +409,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         for(int t=0; t<nTrk; t++)
         {
           if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
-          if(trkPt[t] <= 0.5 || trkPt[t] > 200 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
+          if(trkPt[t] <= 0.5 || trkPt[t] > 400 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
           if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
           else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
           //calculating r_min for tracking correction
@@ -415,7 +417,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           double rmin_pt = 60;
           for(int j2 = 0; j2<nref; j2++)
           {
-            if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>200) continue;
+            if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>400) continue;
             double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
             if(r_min_temp < r_min){ r_min = r_min_temp;
             rmin_pt = jtpt[j2];}
@@ -537,7 +539,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           for(int t = 0; t < nTrkMix; t++)
           {
             if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
-            if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 200 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
+            if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 400 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
             if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
             else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
   
@@ -546,7 +548,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rmin_pt = 60;
             for(int j2 = 0; j2<nrefMix; j2++)
             {
-              if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>200) continue;
+              if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>400) continue;
               double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
               if(r_min_temp < r_min){ r_min = r_min_temp;
               rmin_pt = jtptMix[j2];}
@@ -585,7 +587,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         {
           for(int t=0; t<nParticle; t++)
           { 
-            if(pPt[t] <= 0.5 || pPt[t] > 200 || TMath::Abs(pEta[t])>2.4 ) continue;
+            if(pPt[t] <= 0.5 || pPt[t] > 400 || TMath::Abs(pEta[t])>2.4 ) continue;
             //Filling track spectrum in jet cone
             if(getdR2(jteta[j]+boost,jtphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
             {
@@ -622,7 +624,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             getInputEntryMix(lastMixEvt);
             for(int t = 0; t < nParticleMix; t++)
             {
-              if(pPtMix[t] <= 0.5 || pPtMix[t] > 200 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
+              if(pPtMix[t] <= 0.5 || pPtMix[t] > 400 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
             
               //Filling track spectrum in jet cone
               if(getdR2(jteta[j]+boost,jtphi[j],pEtaMix[t]+boost,pPhiMix[t]) < coneSize*coneSize)
@@ -679,7 +681,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
        
           for(int t=0; t<nParticle; t++)
           { 
-            if(pPt[t] <= 0.5 || pPt[t] > 200 || TMath::Abs(pEta[t])>2.4 ) continue;
+            if(pPt[t] <= 0.5 || pPt[t] > 400 || TMath::Abs(pEta[t])>2.4 ) continue;
   
             //Filling track spectrum in jet cone
             if(getdR2(geneta[j]+boost,genphi[j],pEta[t]+boost,pPhi[t]) < coneSize*coneSize)
@@ -747,7 +749,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             getInputEntryMix(lastMixEvt);
             for(int t = 0; t < nParticleMix; t++)
             {
-              if(pPtMix[t] <= 0.5 || pPtMix[t] > 200 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
+              if(pPtMix[t] <= 0.5 || pPtMix[t] > 400 || TMath::Abs(pEtaMix[t])>2.4 ) continue;
               
               //Filling track spectrum in jet cone
               if(getdR2(geneta[j]+boost,genphi[j],pEtaMix[t]+boost,pPhiMix[t]) < coneSize*coneSize)
@@ -773,7 +775,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           for(int t=0; t<nTrk; t++)
           {         
             if((trkCharge[t]!=1 && v==27) || (trkCharge[t]!=-1 && v==28)) continue;     
-            if(trkPt[t] <= 0.5 || trkPt[t] > 200 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
+            if(trkPt[t] <= 0.5 || trkPt[t] > 400 || !highPurity[t] || TMath::Abs(trkEta[t])>2.4 ) continue;
             if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.1)) continue;            
             else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr && (TMath::Abs(trkDxy1[t]/trkDxyError1[t]) > 3 || TMath::Abs(trkDz1[t]/trkDzError1[t]) > 3 || trkPtError[t]/trkPt[t] > 0.3 || ((pfEcal[t]+pfHcal[t])/TMath::CosH(trkEta[t])<0.5*trkPt[t] && trkPt[t]>20))) continue;            
             //calculating r_min for tracking correction  
@@ -781,7 +783,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rmin_pt = 60;
             for(int j2 = 0; j2<nref; j2++)
             {
-              if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>200) continue;
+              if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>400) continue;
               double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
               if(r_min_temp < r_min){ r_min = r_min_temp;
               rmin_pt = jtpt[j2];}
@@ -846,7 +848,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             for(int t = 0; t < nTrkMix; t++)
             {
               if((trkChargeMix[t]!=1 && v==27) || (trkChargeMix[t]!=-1 && v==28)) continue;     
-              if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 200 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
+              if(trkPtMix[t] <= 0.5 || trkPtMix[t] > 400 || !highPurityMix[t] || TMath::Abs(trkEtaMix[t])>2.4 ) continue;
               if((!(strcmp(mode,"ppref5")==0) || ispPbStyleCorr) && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.1)) continue;            
               else if(strcmp(mode,"ppref5")==0 && !ispPbStyleCorr && (TMath::Abs(trkDxy1Mix[t]/trkDxyError1Mix[t]) > 3 || TMath::Abs(trkDz1Mix[t]/trkDzError1Mix[t]) > 3 || trkPtErrorMix[t]/trkPtMix[t] > 0.3 || ((pfEcalMix[t]+pfHcalMix[t])/TMath::CosH(trkEtaMix[t])<0.5*trkPtMix[t] && trkPtMix[t]>20))) continue;            
   
@@ -855,7 +857,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               double rmin_pt = 60;
               for(int j2 = 0; j2<nrefMix; j2++)
               {
-                if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>200) continue;
+                if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>400) continue;
                 double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
                 if(r_min_temp < r_min){ r_min = r_min_temp;
                 rmin_pt = jtptMix[j2];}

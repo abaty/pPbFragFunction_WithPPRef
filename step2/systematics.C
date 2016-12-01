@@ -12,8 +12,8 @@
 #include "TF1.h"
 #include "TMath.h"
 
-const int FF_Bins = 5;
-double FF_Bound[FF_Bins+1] = {60,80,100,120,140,200};
+const int FF_Bins = 6;
+double FF_Bound[FF_Bins+1] = {60,80,100,120,140,200,300};
 
 void quad(TH1D* h, int j, double percent){
   h->SetBinContent(j,TMath::Power(h->GetBinContent(j)*h->GetBinContent(j)+percent*percent,0.5));
@@ -296,13 +296,13 @@ void systematics(int UEtype=2, int alternativeUE = 0)
   TCanvas * c1;
   TLegend * leg = new TLegend(0.3,0.4,0.7,0.9);
   c1 = new TCanvas("c1","c1",1200,800);
-  float upper[5] = {80,100,120,140,200};
+  float upper[6] = {80,100,120,140,200,300};
   for(int i = 0; i<FF_Bins*2; i++){
     c1->Clear();
     leg->Clear();
     leg->SetBorderSize(0);
     pPbSys[i]->Draw("c");
-    if(i<5){
+    if(i<6){
       pPbSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
       pPbSys[i]->GetXaxis()->SetTitle("p_{T}");
       c1->SetLogx();
@@ -348,7 +348,7 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     leg->Clear();
     leg->SetBorderSize(0);
     ppSys[i]->Draw("c");
-    if(i<5){
+    if(i<6){
       ppSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
       ppSys[i]->GetXaxis()->SetTitle("p_{T}");
       c1->SetLogx();
@@ -393,7 +393,7 @@ void systematics(int UEtype=2, int alternativeUE = 0)
     leg->Clear();
     leg->SetBorderSize(0);
     ratSys[i]->Draw("c");
-    if(i<5){
+    if(i<6){
       ratSys[i]->GetXaxis()->SetRangeUser(0.5,upper[i]);
       ratSys[i]->GetXaxis()->SetTitle("p_{T}");
       c1->SetLogx();

@@ -118,7 +118,7 @@ double getPPDataSmearFactor(float jtpt)
     initializeJER();
     isJER_Initialized = true;
   }
-  if(jtpt<50 || jtpt>220) return 0;
+  if(jtpt<50 || jtpt>320) return 0;
   return ppAdditionalSmearingTopPb->GetBinContent(ppAdditionalSmearingTopPb->FindBin(jtpt));
   /*
   float pp1 = 0.554;
