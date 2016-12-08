@@ -181,6 +181,7 @@ void makeFF(int v, int UEtype=3)
     pPbPbp_FF_gJrTMC[i]->Write();
   }
   //handing it over to a plotting macro
+  if(FF_Bins==1){ outfile->Close(); return;}
   makePlots(variationTag[v],UEtype); 
   outfile->Close(); 
 }
@@ -195,7 +196,7 @@ TH1D* getFF_pp(double jetPt_low, double jetPt_high, const char* histTitle, int m
     FF = new TH1D(histTitle,";p_{T trk};#frac{1}{N_{jet}} #frac{dN_{trk}}{dp_{t trk}}",trkBins ,yAxis);
 
     //looping over bins in Trk pt
-    for(int t = 1; t < trk->GetYaxis()->FindBin(jetPt_high); t++)
+    for(int t = 1; t < trk->GetYaxis()->FindBin(TMath::Min(300.0,jetPt_high)); t++)
     {
       double sum   = 0;
       double error = 0;
@@ -206,7 +207,10 @@ TH1D* getFF_pp(double jetPt_low, double jetPt_high, const char* histTitle, int m
       {
         //reweighting factor to 5 TeV pPb
         //for (mode 2) 5TeV pPb jet_pPb = jet so this is by definition one
-        double w = jet_pPb->GetBinContent(j)/jet->GetBinContent(j);
+        double w = 1;
+        if(jet->GetBinContent(j)==0) w = 1;
+        else w = jet_pPb->GetBinContent(j)/jet->GetBinContent(j);
+        if(jet_pPb->GetBinContent(j)==0) continue;
 
         //adding up contributions to the FF from each track and jet bin
         sum   += w*(trk->GetBinContent(j,t) - trkUE->GetBinContent(j,t));
@@ -239,7 +243,10 @@ TH1D* getFF_pp(double jetPt_low, double jetPt_high, const char* histTitle, int m
       {
         //reweighting factor to 5 TeV pPb
         //for (mode 2) 5TeV pPb jet_pPb = jet so this is by definition one
-        double w = jet_pPb->GetBinContent(j)/jet->GetBinContent(j);
+        double w = 1;
+        if(jet->GetBinContent(j)==0) w = 1;
+        else w = jet_pPb->GetBinContent(j)/jet->GetBinContent(j);
+        if(jet_pPb->GetBinContent(j)==0) continue;
 
         //adding up contributions to the FF from each track and jet bin
         sum   += w*(trk_xi->GetBinContent(j,t) - trkUE_xi->GetBinContent(j,t));

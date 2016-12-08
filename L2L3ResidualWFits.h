@@ -175,7 +175,7 @@ class L2ResidualJER
 	                  {6.08142e+00,1.05733e+00}};
 	  
 	for(int ieta = 0; ieta < neta; ieta++){
-     fitSF[ieta] = new TF1(Form("fitSF_eta%d",ieta),"[0]/pow(x,[1])",50,400);
+     fitSF[ieta] = new TF1(Form("fitSF_eta%d",ieta),"[0]/pow(x,[1])",50,1000);
     }
 	
 	this->mode = mode;

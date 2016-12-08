@@ -25,7 +25,7 @@
 
 const double pPbRapidity = 0.4654094531;
 //const double pPbRapidity = 0;
-const int nJetBins = 160;
+const int nJetBins = 400;
 const int ntrackBins=25;
 const double axis[ntrackBins] = {0.5, 0.63, 0.77,  1.03,1.38, 1.84, 2.46, 3.29,  4.40, 5.88,  7.87,  10.52, 14.06,  18.8, 25.13,  33.58,  44.89,  60, 80, 100, 120, 140, 200,300,400};
 
@@ -137,51 +137,51 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     //if(typeUE==2 && (v!=0 && v!=31)) continue;
 
     //reco
-    h_jet = new TH1D("h_jet","",nJetBins,0,400); 
-    h_track = new TH2D("h_track","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE = new TH2D("h_trackUE","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi = new TH2D("h_track_xi","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi = new TH2D("h_trackUE_xi","",nJetBins,0,400,24,0,6.0);
+    h_jet = new TH1D("h_jet","",nJetBins,0,1000); 
+    h_track = new TH2D("h_track","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE = new TH2D("h_trackUE","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi = new TH2D("h_track_xi","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi = new TH2D("h_trackUE_xi","",nJetBins,0,1000,24,0,6.0);
   
     //gen/reco combinations  
-    h_track_rJgT = new TH2D("h_track_rJgT","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_rJgT = new TH2D("h_trackUE_rJgT","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_rJgT = new TH2D("h_track_xi_rJgT","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_rJgT = new TH2D("h_trackUE_xi_rJgT","",nJetBins,0,400,24,0,6.0);
+    h_track_rJgT = new TH2D("h_track_rJgT","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_rJgT = new TH2D("h_trackUE_rJgT","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_rJgT = new TH2D("h_track_xi_rJgT","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_rJgT = new TH2D("h_trackUE_xi_rJgT","",nJetBins,0,1000,24,0,6.0);
   
-    h_track_gJrT = new TH2D("h_track_gJrT","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_gJrT = new TH2D("h_trackUE_gJrT","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_gJrT = new TH2D("h_track_xi_gJrT","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_gJrT = new TH2D("h_trackUE_xi_gJrT","",nJetBins,0,400,24,0,6.0);
+    h_track_gJrT = new TH2D("h_track_gJrT","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_gJrT = new TH2D("h_trackUE_gJrT","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_gJrT = new TH2D("h_track_xi_gJrT","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_gJrT = new TH2D("h_trackUE_xi_gJrT","",nJetBins,0,1000,24,0,6.0);
   
     //gen
-    h_jet_gen = new TH1D("h_jet_gen","",nJetBins,0,400);
-    h_track_gen = new TH2D("h_track_gen","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_gen = new TH2D("h_trackUE_gen","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_gen = new TH2D("h_track_xi_gen","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_gen = new TH2D("h_trackUE_xi_gen","",nJetBins,0,400,24,0,6.0);   
+    h_jet_gen = new TH1D("h_jet_gen","",nJetBins,0,1000);
+    h_track_gen = new TH2D("h_track_gen","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_gen = new TH2D("h_trackUE_gen","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_gen = new TH2D("h_track_xi_gen","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_gen = new TH2D("h_trackUE_xi_gen","",nJetBins,0,1000,24,0,6.0);   
   
     //Quark Gluons checks 
-    h_jet_Q = new TH1D("h_jet_Q","",nJetBins,0,400);
-    h_track_Q = new TH2D("h_track_Q","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_Q = new TH2D("h_trackUE_Q","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_Q = new TH2D("h_track_xi_Q","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_Q = new TH2D("h_trackUE_xi_Q","",nJetBins,0,400,24,0,6.0);
-    h_jet_G = new TH1D("h_jet_G","",nJetBins,0,400);
-    h_track_G = new TH2D("h_track_G","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_G = new TH2D("h_trackUE_G","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_G = new TH2D("h_track_xi_G","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_G = new TH2D("h_trackUE_xi_G","",nJetBins,0,400,24,0,6.0);
-    h_jet_gen_Q = new TH1D("h_jet_gen_Q","",nJetBins,0,400);
-    h_track_gen_Q = new TH2D("h_track_gen_Q","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_gen_Q = new TH2D("h_trackUE_gen_Q","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_gen_Q = new TH2D("h_track_xi_gen_Q","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_gen_Q = new TH2D("h_trackUE_xi_gen_Q","",nJetBins,0,400,24,0,6.0);
-    h_jet_gen_G = new TH1D("h_jet_gen_G","",nJetBins,0,400);
-    h_track_gen_G = new TH2D("h_track_gen_G","",nJetBins,0,400,ntrackBins-1,axis);
-    h_trackUE_gen_G = new TH2D("h_trackUE_gen_G","",nJetBins,0,400,ntrackBins-1,axis);
-    h_track_xi_gen_G = new TH2D("h_track_xi_gen_G","",nJetBins,0,400,24,0,6.0);
-    h_trackUE_xi_gen_G = new TH2D("h_trackUE_xi_gen_G","",nJetBins,0,400,24,0,6.0); 
+    h_jet_Q = new TH1D("h_jet_Q","",nJetBins,0,1000);
+    h_track_Q = new TH2D("h_track_Q","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_Q = new TH2D("h_trackUE_Q","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_Q = new TH2D("h_track_xi_Q","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_Q = new TH2D("h_trackUE_xi_Q","",nJetBins,0,1000,24,0,6.0);
+    h_jet_G = new TH1D("h_jet_G","",nJetBins,0,1000);
+    h_track_G = new TH2D("h_track_G","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_G = new TH2D("h_trackUE_G","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_G = new TH2D("h_track_xi_G","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_G = new TH2D("h_trackUE_xi_G","",nJetBins,0,1000,24,0,6.0);
+    h_jet_gen_Q = new TH1D("h_jet_gen_Q","",nJetBins,0,1000);
+    h_track_gen_Q = new TH2D("h_track_gen_Q","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_gen_Q = new TH2D("h_trackUE_gen_Q","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_gen_Q = new TH2D("h_track_xi_gen_Q","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_gen_Q = new TH2D("h_trackUE_xi_gen_Q","",nJetBins,0,1000,24,0,6.0);
+    h_jet_gen_G = new TH1D("h_jet_gen_G","",nJetBins,0,1000);
+    h_track_gen_G = new TH2D("h_track_gen_G","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_trackUE_gen_G = new TH2D("h_trackUE_gen_G","",nJetBins,0,1000,ntrackBins-1,axis);
+    h_track_xi_gen_G = new TH2D("h_track_xi_gen_G","",nJetBins,0,1000,24,0,6.0);
+    h_trackUE_xi_gen_G = new TH2D("h_trackUE_xi_gen_G","",nJetBins,0,1000,24,0,6.0); 
 
     const int trkVsJEC_jetBins = 9;
     const double trkVsJEC_jetBinsAxis[trkVsJEC_jetBins+1] = {50,60,80,100,120,140,160,180,200,220};
@@ -191,6 +191,11 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     h_JEC_weights = new TProfile("h_JEC_weights","",trkVsJEC_jetBins,trkVsJEC_jetBinsAxis);
     TProfile * h_L2ResidualCorr = new TProfile("h_L2ResidualCorr","",160,50,210);
     TProfile * h_L2ResidualCorr_eta = new TProfile("h_L2ResidualCorr_eta","",40,-2,2);
+
+    //trigger combination (for xchecks)
+    TH1D * nLeadJet40 = new TH1D("nLeadJet40","nLeadJet40",100,0,1000);
+    TH1D * nLeadJet60 = new TH1D("nLeadJet60","nLeadJet60",100,0,1000);
+    TH1D * nLeadJet80 = new TH1D("nLeadJet80","nLeadJet80",100,0,1000);
   
     //boosting
     double boost = 0;
@@ -233,6 +238,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
     //nEntry = 10;
     for(int i=0; i<nEntry; i++)
     {
+      weight = 1;
       getInputEntry(i);
       //fix to pthat weights if using first production of ppref with Pythia8 (comment otherwise)
       /*if(isMC && strcmp(mode,"ppref5")==0){
@@ -299,8 +305,14 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       //pPb5 and Pbp5 activity weightings
       if((strcmp(mode,"pPb5")==0) && isMC) weight = weight*MCTruth->getHFPbWeight(hiHFminusEta4);
       if((strcmp(mode,"Pbp5")==0) && isMC) weight = weight*MCTruth->getHFPbWeight(hiHFplusEta4);
+      //trigger combining weights (magic numbers are average prescales)
+      if((strcmp(mode,"ppref5")==0) && (strcmp(trigger,"jet60")==0)  && !isMC) weight = weight*6.283512;
+      if((strcmp(mode,"ppref5")==0) && (strcmp(trigger,"jet40")==0)  && !isMC) weight = weight*28.90433;
+      if((strcmp(mode,"pPb5")==0) && (strcmp(trigger,"jet40")==0)  && !isMC) weight = weight*28.79457;
+      if((strcmp(mode,"Pbp5")==0) && (strcmp(trigger,"jet40")==0)  && !isMC) weight = weight*28.79457;
  
       //starting jet loop Reco
+      bool filledTriggerObject = false;
       for(int j=0; j<nref; j++)
       {
         totalJetsHist->Fill(1,weight);
@@ -312,6 +324,9 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
         if(TMath::Abs(jteta[j]+boost) < jetEtaMin || TMath::Abs(jteta[j]+boost) > (doMidRapidity?0.25:jetEtaMax)) continue;
         if(typeUE==1 && (TMath::Abs(jteta[j]+boost))<coneSize) continue;
         totalJetsEtaCutHist->Fill(1,weight);
+        if(strcmp(trigger,"jet40")==0 && filledTriggerObject==false){ nLeadJet40->Fill(jtpt[j],1); filledTriggerObject=true;}
+        if(strcmp(trigger,"jet60")==0 && filledTriggerObject==false){ nLeadJet60->Fill(jtpt[j],1); filledTriggerObject=true;}
+        if(strcmp(trigger,"jet80")==0 && filledTriggerObject==false){ nLeadJet80->Fill(jtpt[j],1); filledTriggerObject=true;}
   
       //JEC and its corrections applied
         float appliedL2Corr = 0;
@@ -386,7 +401,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
 
         //adding 10 GeV buffer here to the lowest bin
         totalJetsPtCutHist->Fill(1,weight);    
-        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==400)?420:upJetPtBound)) continue;      
+        if(jtpt[j]<((lowJetPtBound==60)?50:lowJetPtBound) || jtpt[j]>=((upJetPtBound==1000)?1020:upJetPtBound)) continue;      
         /*if(isMC && refpt[j]>20){
           h_JEC->Fill(refpt[j],jtpt[j]/refpt[j],weight);
           h_JEC_weights->Fill(refpt[j],weight);
@@ -417,7 +432,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
           double rmin_pt = 60;
           for(int j2 = 0; j2<nref; j2++)
           {
-            if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>400) continue;
+            if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>1000) continue;
             double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
             if(r_min_temp < r_min){ r_min = r_min_temp;
             rmin_pt = jtpt[j2];}
@@ -548,7 +563,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rmin_pt = 60;
             for(int j2 = 0; j2<nrefMix; j2++)
             {
-              if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>400) continue;
+              if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>1000) continue;
               double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
               if(r_min_temp < r_min){ r_min = r_min_temp;
               rmin_pt = jtptMix[j2];}
@@ -783,7 +798,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
             double rmin_pt = 60;
             for(int j2 = 0; j2<nref; j2++)
             {
-              if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>400) continue;
+              if(TMath::Abs(jteta[j2])>2 || TMath::Abs(jtpt[j2]) < 60 || jtpt[j2]>1000) continue;
               double r_min_temp = TMath::Power(getdR2(jteta[j2],jtphi[j2],trkEta[t],trkPhi[t]),0.5);
               if(r_min_temp < r_min){ r_min = r_min_temp;
               rmin_pt = jtpt[j2];}
@@ -857,7 +872,7 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
               double rmin_pt = 60;
               for(int j2 = 0; j2<nrefMix; j2++)
               {
-                if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>400) continue;
+                if(TMath::Abs(jtetaMix[j2])>2 || TMath::Abs(jtptMix[j2]) < 60 || jtptMix[j2]>1000) continue;
                 double r_min_temp = TMath::Power(getdR2(jtetaMix[j2],jtphiMix[j2],trkEtaMix[t],trkPhiMix[t]),0.5);
                 if(r_min_temp < r_min){ r_min = r_min_temp;
                 rmin_pt = jtptMix[j2];}
@@ -933,7 +948,13 @@ void Spectra(const char* inputJets, const char* inputMB, const char* mode = "pp2
       h_L2ResidualCorr->SetDirectory(0);
       h_L2ResidualCorr->Write(); 
       h_L2ResidualCorr_eta->SetDirectory(0);
-      h_L2ResidualCorr_eta->Write(); 
+      h_L2ResidualCorr_eta->Write();
+      nLeadJet40->SetDirectory(0); 
+      nLeadJet60->SetDirectory(0); 
+      nLeadJet80->SetDirectory(0); 
+      nLeadJet40->Write(); 
+      nLeadJet60->Write(); 
+      nLeadJet80->Write(); 
     }
 
     h_jet->Write(Form("%s_reco_jet%s",mode,variationTag[v]));
